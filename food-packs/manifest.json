@@ -1,5 +1,14 @@
 {
   "schema_version": 1,
   "updated_at": "2026-08-26",
-  "packs": []
+  "packs": [
+    {
+      "id": "test_foods",
+      "name": "测试食材包",
+      "version": "2026.08.1",
+      "file": "test-foods.json",
+      "food_count": 3,
+      "description": "用于验证在线下载与离线保存功能"
+    }
+  ]
 }
