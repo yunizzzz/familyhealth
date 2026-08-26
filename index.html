@@ -637,6 +637,60 @@
     .home-task-status.second{background:#fff2d8;color:#a56b00}
     .home-task-status.upcoming{background:#f1f4f2;color:#68766d}
 
+
+    .online-food-panel{padding:17px;border:1px solid #cfe1f1;border-radius:15px;background:linear-gradient(135deg,#fbfdff,#f5f9fc);margin-bottom:16px}
+    .online-food-head{display:flex;align-items:flex-start;justify-content:space-between;gap:14px}
+    .online-food-title{font-size:17px;font-weight:800}
+    .online-food-status{display:flex;align-items:center;gap:8px;margin-top:12px;font-size:12px;color:var(--text-secondary)}
+    .online-status-dot{width:8px;height:8px;border-radius:50%;background:#aab5ae;flex:0 0 auto}
+    .online-food-status.checking .online-status-dot{background:#4f8bc9;animation:onlinePulse 1s infinite}
+    .online-food-status.success .online-status-dot{background:var(--primary)}
+    .online-food-status.error .online-status-dot{background:var(--danger)}
+    .online-food-privacy{margin-top:8px;font-size:10px;color:var(--text-light)}
+    .online-food-pack-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:11px;margin-top:14px}
+    .online-pack-card{padding:14px;border-radius:13px;border:1px solid #dce7ee;background:#fff}
+    .online-pack-card.update{border-color:#efd59d;background:#fffdf8}
+    .online-pack-card.installed{border-color:#d3e6da;background:#fbfefc}
+    .online-pack-top{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
+    .online-pack-name{font-size:14px;font-weight:800}
+    .online-pack-version{font-size:10px;padding:4px 7px;border-radius:999px;background:#f1f5f7;color:#63717a;white-space:nowrap}
+    .online-pack-meta{margin-top:5px;font-size:11px;color:var(--text-light)}
+    .online-pack-desc{margin-top:8px;font-size:11px;line-height:1.6;color:var(--text-secondary)}
+    .online-pack-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:11px}
+    .online-pack-progress{height:6px;border-radius:999px;background:#edf1f3;overflow:hidden;margin-top:10px;display:none}
+    .online-pack-progress>div{height:100%;width:0;background:var(--primary);transition:width .2s ease}
+    .online-pack-installed-note{font-size:10px;color:var(--text-light)}
+    .offline-food-divider{display:flex;align-items:center;gap:10px;margin:18px 0 13px;color:var(--text-light);font-size:11px}
+    .offline-food-divider:before,.offline-food-divider:after{content:"";height:1px;background:var(--border);flex:1}
+    @keyframes onlinePulse{0%,100%{opacity:.45}50%{opacity:1}}
+    @media(max-width:760px){.online-food-head{flex-direction:column}.online-food-head .primary-btn{width:100%}.online-food-pack-list{grid-template-columns:1fr}}
+
+
+    /* 家庭资料备份 */
+    .backup-privacy-banner{display:flex;gap:14px;align-items:flex-start;padding:17px 18px;border:1px solid #cfe3d7;border-radius:15px;background:#f7fcf8;margin-bottom:20px}
+    .backup-privacy-icon{width:42px;height:42px;flex:0 0 auto;border-radius:12px;background:#e5f4e9;display:grid;place-items:center;font-size:21px}
+    .backup-privacy-banner strong{font-size:14px}.backup-privacy-banner p{margin-top:5px;color:var(--text-secondary);font-size:12px;line-height:1.65}
+    .backup-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:20px}
+    .backup-main-card{min-height:330px}.backup-card-icon{width:48px;height:48px;border-radius:14px;background:var(--primary-lighter);display:grid;place-items:center;font-size:23px;margin-bottom:14px}
+    .backup-summary-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:17px 0}
+    .backup-summary-item{padding:10px;border-radius:10px;background:#f7faf8;border:1px solid var(--border)}
+    .backup-summary-item span{display:block;font-size:10px;color:var(--text-light)}.backup-summary-item strong{display:block;font-size:17px;margin-top:4px}
+    .backup-primary-btn,.backup-select-btn{width:100%;margin-top:8px}
+    .backup-help{font-size:10px;line-height:1.65;color:var(--text-light);margin-top:11px}
+    .backup-restore-preview{margin-top:15px;border-radius:12px;border:1px dashed #d7e2db;background:#fbfcfb;min-height:120px;padding:14px}
+    .backup-empty-preview{height:90px;display:grid;place-items:center;color:var(--text-light);font-size:12px}
+    .backup-preview-title{font-weight:800;font-size:13px}.backup-preview-meta{font-size:10px;color:var(--text-light);margin-top:5px}
+    .backup-preview-counts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;margin-top:12px}
+    .backup-preview-count{background:#fff;border:1px solid var(--border);padding:8px;border-radius:9px;font-size:10px;color:var(--text-secondary)}
+    .backup-preview-count strong{font-size:13px;color:var(--text-main)}
+    .backup-restore-actions{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:13px;flex-wrap:wrap}
+    .backup-safe-check{font-size:10px;color:var(--text-secondary);display:flex;gap:6px;align-items:center}
+    .backup-includes{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:11px;margin-top:15px}
+    .backup-includes>div{padding:13px;border-radius:11px;background:#fafcfb;border:1px solid var(--border)}
+    .backup-includes span{font-size:20px;display:block;margin-bottom:8px}.backup-includes strong{display:block;font-size:12px}.backup-includes small{display:block;margin-top:5px;color:var(--text-light);line-height:1.5}
+    @media(max-width:900px){.backup-grid{grid-template-columns:1fr}.backup-includes{grid-template-columns:repeat(2,minmax(0,1fr))}}
+    @media(max-width:600px){.backup-summary-grid,.backup-includes{grid-template-columns:1fr 1fr}.backup-preview-counts{grid-template-columns:1fr}}
+
 </style>
 </head>
 <body>
@@ -653,10 +707,11 @@
     <button class="nav-item" data-page="diet" data-title="饮食营养"><span class="nav-icon">🥗</span>饮食营养</button>
     <button class="nav-item" data-page="analysis" data-title="健康分析"><span class="nav-icon">📈</span>健康分析</button>
     <button class="nav-item" data-page="reminder" data-title="健康提醒"><span class="nav-icon">🔔</span>健康提醒</button>
+    <button class="nav-item" data-page="backup" data-title="资料备份"><span class="nav-icon">🛡️</span>资料备份</button>
   </nav>
   <div class="sidebar-footer">
     <div class="sidebar-footer-title">本地数据存储</div>
-    <div class="sidebar-footer-text">所有健康数据仅保存在当前浏览器 localStorage 中。</div>
+    <div class="sidebar-footer-text">私人健康资料保存在当前浏览器的本地存储中，不上传到 GitHub。</div>
   </div>
 </aside>
 
@@ -1213,6 +1268,59 @@
   <div id="reminderToast" class="reminder-toast" aria-live="polite"></div>
 </section>
 
+<section class="page" id="page-backup">
+  <div class="page-header">
+    <div>
+      <h2>家庭资料备份</h2>
+      <p>把家庭成员、健康记录、饮食、提醒和个人食材保存到你自己的设备。备份过程不会上传任何私人资料。</p>
+    </div>
+  </div>
+
+  <div class="backup-privacy-banner">
+    <div class="backup-privacy-icon">🛡️</div>
+    <div>
+      <strong>备份只在你的浏览器和设备之间进行</strong>
+      <p>GitHub 只提供网页程序和公共食材资料；你的家庭健康备份文件由浏览器直接生成并保存到本机。</p>
+    </div>
+  </div>
+
+  <div class="backup-grid">
+    <div class="card backup-main-card">
+      <div class="backup-card-icon">💾</div>
+      <div class="card-title">备份我的家庭健康资料</div>
+      <div class="card-subtitle">建议在换手机、换电脑、清理浏览器数据或进行重要更新前备份一次。</div>
+      <div class="backup-summary-grid" id="backupCurrentSummary"></div>
+      <button class="primary-btn backup-primary-btn" type="button" onclick="downloadFamilyBackup(false)">下载备份文件</button>
+      <div class="backup-help">下载后会得到一个“家庭健康备份”文件，请像保存照片或重要文档一样妥善保存。文件可能包含家庭成员姓名和健康信息。</div>
+    </div>
+
+    <div class="card backup-main-card">
+      <div class="backup-card-icon">↩️</div>
+      <div class="card-title">从备份恢复</div>
+      <div class="card-subtitle">换设备时，选择之前保存的家庭健康备份文件即可恢复。</div>
+      <input type="file" id="backupRestoreFile" accept=".yunihealth,.json,application/json" style="display:none" onchange="handleBackupFileSelected(event)">
+      <button class="secondary-btn backup-select-btn" type="button" onclick="document.getElementById('backupRestoreFile').click()">选择备份文件</button>
+      <div id="backupRestorePreview" class="backup-restore-preview">
+        <div class="backup-empty-preview">尚未选择备份文件</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card backup-details-card">
+    <div class="card-title">备份里包含什么？</div>
+    <div class="backup-includes">
+      <div><span>👨‍👩‍👧</span><strong>家庭成员</strong><small>基本档案、头像、过敏信息等</small></div>
+      <div><span>❤️</span><strong>健康记录</strong><small>身高、体重、血压、血糖、心率</small></div>
+      <div><span>🥗</span><strong>饮食记录</strong><small>每日饮食、营养快照、自定义菜谱</small></div>
+      <div><span>🔔</span><strong>提醒与完成记录</strong><small>提醒计划、完成历史、用药执行记录</small></div>
+      <div><span>🥕</span><strong>个人食材库</strong><small>自己添加、修改及已下载到本机的食材</small></div>
+      <div><span>🔥</span><strong>坚持记录配置</strong><small>连续记录和本地设置</small></div>
+    </div>
+    <div class="reference-note">恢复会替换这个浏览器中当前的家庭健康资料。恢复前默认会先下载一份“恢复前安全备份”，避免误操作。不会调用 <code>localStorage.clear()</code>，也不会删除与本网页无关的网站数据。</div>
+  </div>
+</section>
+
+
 
 </div>
 </main>
@@ -1377,12 +1485,30 @@
     <div class="modal-header">
       <div>
         <h3>扩充食材库</h3>
-        <div class="card-subtitle">想慢慢挑，可以进入分类浏览；想省时间，也可以一键添加常用食材。</div>
+        <div class="card-subtitle">可下载 GitHub 上的最新公共食材资料，也可继续浏览本机内置分类。线上资料下载一次后即可离线使用。</div>
       </div>
       <button class="modal-close" onclick="closePublicFoodPacks()">×</button>
     </div>
     <div class="modal-body">
       <div id="publicFoodMarketHome">
+        <div class="online-food-panel">
+          <div class="online-food-head">
+            <div>
+              <div class="online-food-title">🌐 在线食材资料</div>
+              <div class="card-subtitle">从与你的网页同一 GitHub Pages 地址读取公开 JSON 食材包。下载完成后保存在本机 IndexedDB，日常使用无需联网。</div>
+            </div>
+            <button class="primary-btn" id="onlineFoodCheckBtn" onclick="checkOnlineFoodPacks(true)">检查线上资料</button>
+          </div>
+          <div class="online-food-status" id="onlineFoodStatus">
+            <span class="online-status-dot"></span>
+            <span>尚未检查线上食材资料</span>
+          </div>
+          <div class="online-food-privacy">只下载公共食材资料，不会上传家庭成员、健康记录、饮食记录或用药记录。</div>
+          <div id="onlineFoodPackList" class="online-food-pack-list"></div>
+        </div>
+
+        <div class="offline-food-divider"><span>本机内置食材市场</span></div>
+
         <div class="public-market-hero">
           <div>
             <div class="public-market-title">像逛市场一样挑食材</div>
@@ -1748,7 +1874,8 @@
 </div>
 
 <script>
-const STORAGE_KEYS={FAMILY_MEMBERS:"family_member_list",HEALTH_RECORDS:"health_index_record",DIET_RECORDS:"diet_nutrition_record",CUSTOM_DISHES:"custom_dish_library",REMINDERS:"health_remind_list",REMINDER_LOGS:"health_reminder_logs",MEDICATION_LOGS:"medication_execution_logs",STREAK_PROTECTION:"health_streak_protection",GLOBAL_CONFIG:"health_global_config"};
+const APP_VERSION="2026.08.26-backup-1";
+const STORAGE_KEYS={FAMILY_MEMBERS:"family_member_list",HEALTH_RECORDS:"health_index_record",DIET_RECORDS:"diet_nutrition_record",CUSTOM_DISHES:"custom_dish_library",REMINDERS:"health_remind_list",REMINDER_LOGS:"health_reminder_logs",MEDICATION_LOGS:"medication_execution_logs",STREAK_PROTECTION:"health_streak_protection",ONLINE_FOOD_PACKS:"online_food_pack_state",GLOBAL_CONFIG:"health_global_config"};
 function loadData(key,def=[]){try{const v=localStorage.getItem(key);return v===null?def:JSON.parse(v)}catch(e){return def}}
 function saveData(key,data){localStorage.setItem(key,JSON.stringify(data))}
 function formatDate(d=new Date()){return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`}
@@ -1775,6 +1902,7 @@ function initSampleData(){
   if(localStorage.getItem(STORAGE_KEYS.REMINDER_LOGS)===null)saveData(STORAGE_KEYS.REMINDER_LOGS,[]);
   if(localStorage.getItem(STORAGE_KEYS.MEDICATION_LOGS)===null)saveData(STORAGE_KEYS.MEDICATION_LOGS,[]);
   if(localStorage.getItem(STORAGE_KEYS.STREAK_PROTECTION)===null)saveData(STORAGE_KEYS.STREAK_PROTECTION,{family:[],members:{}});
+  if(localStorage.getItem(STORAGE_KEYS.ONLINE_FOOD_PACKS)===null)saveData(STORAGE_KEYS.ONLINE_FOOD_PACKS,{installed:{},last_checked:""});
   if(localStorage.getItem(STORAGE_KEYS.GLOBAL_CONFIG)===null)saveData(STORAGE_KEYS.GLOBAL_CONFIG,{default_member_id:"m001",update_date:formatDate()});
 }
 
@@ -3493,6 +3621,247 @@ const PUBLIC_FOOD_PACKS=[
   }
 ];
 
+
+const ONLINE_FOOD_MANIFEST_URL="./food-packs/manifest.json";
+let onlineFoodManifest=null;
+let onlineFoodChecking=false;
+let onlineFoodDownloading=new Set();
+
+function getOnlineFoodPackState(){
+  const raw=loadData(STORAGE_KEYS.ONLINE_FOOD_PACKS,{installed:{},last_checked:""});
+  return {
+    installed:raw&&typeof raw.installed==="object"&&raw.installed?raw.installed:{},
+    last_checked:String(raw?.last_checked||"")
+  };
+}
+function saveOnlineFoodPackState(state){
+  saveData(STORAGE_KEYS.ONLINE_FOOD_PACKS,{
+    installed:state?.installed||{},
+    last_checked:state?.last_checked||new Date().toISOString()
+  });
+}
+function onlineFoodStatus(text,type=""){
+  const box=document.getElementById("onlineFoodStatus");
+  if(!box)return;
+  box.className=`online-food-status ${type}`.trim();
+  box.innerHTML=`<span class="online-status-dot"></span><span>${escapeHtml(text)}</span>`;
+}
+function safeOnlineFoodFileUrl(file){
+  const raw=String(file||"").trim();
+  if(!raw||raw.includes("..")||/^https?:\/\//i.test(raw)||raw.startsWith("//"))throw new Error("食材包文件地址不安全");
+  const manifestUrl=new URL(ONLINE_FOOD_MANIFEST_URL,location.href);
+  const url=new URL(raw,manifestUrl);
+  if(url.origin!==location.origin)throw new Error("食材包必须与当前网页同源");
+  const basePath=manifestUrl.pathname.slice(0,manifestUrl.pathname.lastIndexOf("/")+1);
+  if(!url.pathname.startsWith(basePath))throw new Error("食材包路径超出允许目录");
+  return url;
+}
+function validateOnlineFoodManifest(data){
+  if(!data||typeof data!=="object")throw new Error("线上资料清单格式不正确");
+  if(Number(data.schema_version)!==1)throw new Error("暂不支持这个食材资料清单版本");
+  if(!Array.isArray(data.packs))throw new Error("线上资料清单缺少食材包列表");
+  const ids=new Set();
+  data.packs.forEach((p,i)=>{
+    if(!p||typeof p!=="object")throw new Error(`第 ${i+1} 个食材包信息无效`);
+    if(!String(p.id||"").trim())throw new Error(`第 ${i+1} 个食材包缺少编号`);
+    if(ids.has(String(p.id)))throw new Error(`食材包编号重复：${p.id}`);
+    ids.add(String(p.id));
+    if(!String(p.name||"").trim())throw new Error(`食材包 ${p.id} 缺少名称`);
+    if(!String(p.version||"").trim())throw new Error(`食材包 ${p.id} 缺少版本`);
+    if(!String(p.file||"").trim())throw new Error(`食材包 ${p.id} 缺少下载文件`);
+    safeOnlineFoodFileUrl(p.file);
+    if(p.food_count!=null&&(!Number.isInteger(Number(p.food_count))||Number(p.food_count)<0))throw new Error(`食材包 ${p.id} 的数量信息无效`);
+  });
+  return true;
+}
+function nutrientValueIsValid(v){
+  return v==null||v===""||(Number.isFinite(Number(v))&&Number(v)>=0);
+}
+function validateOnlineFoodPack(data,manifestPack){
+  if(!data||typeof data!=="object")throw new Error("下载的食材资料不是有效对象");
+  if(String(data.pack_id||"")!==String(manifestPack.id))throw new Error("下载文件与清单中的食材包编号不一致");
+  if(String(data.version||"")!==String(manifestPack.version))throw new Error("下载文件版本与清单版本不一致");
+  if(!Array.isArray(data.foods))throw new Error("下载文件缺少 foods 食材列表");
+  if(manifestPack.food_count!=null&&data.foods.length!==Number(manifestPack.food_count))throw new Error(`食材数量校验失败：清单 ${manifestPack.food_count} 种，实际 ${data.foods.length} 种`);
+  const ids=new Set();
+  const nutrientKeys=["cal","protein","fat","carb","fiber","calcium","iron","zinc","magnesium","potassium","sodium","va","vc","vd"];
+  data.foods.forEach((food,i)=>{
+    if(!food||typeof food!=="object")throw new Error(`第 ${i+1} 条食材资料无效`);
+    const fid=String(food.public_food_id||"").trim();
+    if(!fid)throw new Error(`第 ${i+1} 条食材缺少 public_food_id`);
+    if(ids.has(fid))throw new Error(`发现重复食材编号：${fid}`);
+    ids.add(fid);
+    if(!String(food.name||"").trim())throw new Error(`食材 ${fid} 缺少名称`);
+    const n=food.nutrition_per_100g;
+    if(!n||typeof n!=="object")throw new Error(`${food.name} 缺少每100g营养资料`);
+    for(const k of nutrientKeys){
+      if(!nutrientValueIsValid(n[k]))throw new Error(`${food.name} 的 ${k} 数值无效`);
+    }
+    const cal=Number(n.cal||0),protein=Number(n.protein||0),fat=Number(n.fat||0),carb=Number(n.carb||0);
+    if(cal===0&&(protein>0||fat>0||carb>0))throw new Error(`${food.name} 的热量为0，但宏量营养不为0，请检查数据源`);
+  });
+  return true;
+}
+async function fetchOnlineFoodManifest(force=false){
+  if(onlineFoodChecking)return onlineFoodManifest;
+  onlineFoodChecking=true;
+  onlineFoodStatus("正在检查 GitHub 上的食材资料…","checking");
+  const btn=document.getElementById("onlineFoodCheckBtn");
+  if(btn){btn.disabled=true;btn.textContent="正在检查…";}
+  try{
+    const url=new URL(ONLINE_FOOD_MANIFEST_URL,location.href);
+    if(force)url.searchParams.set("_",Date.now());
+    const response=await fetch(url.toString(),{cache:"no-store"});
+    if(!response.ok)throw new Error(`无法读取食材资料清单（HTTP ${response.status}）`);
+    const data=await response.json();
+    validateOnlineFoodManifest(data);
+    onlineFoodManifest=data;
+    const state=getOnlineFoodPackState();
+    state.last_checked=new Date().toISOString();
+    saveOnlineFoodPackState(state);
+    onlineFoodStatus(`已连接线上食材资料 · 共 ${data.packs.length} 个资料包`,"success");
+    renderOnlineFoodPacks();
+    return data;
+  }catch(err){
+    onlineFoodManifest=null;
+    onlineFoodStatus(`暂时无法读取线上食材资料：${err.message||"请检查网络或 GitHub 文件"}`,"error");
+    renderOnlineFoodPacks();
+    return null;
+  }finally{
+    onlineFoodChecking=false;
+    if(btn){btn.disabled=false;btn.textContent="检查线上资料";}
+  }
+}
+async function checkOnlineFoodPacks(force=false){
+  return fetchOnlineFoodManifest(force);
+}
+function onlinePackInstallStatus(pack){
+  const state=getOnlineFoodPackState(),installed=state.installed[String(pack.id)];
+  if(!installed)return {code:"not_installed",text:"尚未下载",record:null};
+  if(String(installed.version)===String(pack.version))return {code:"current",text:"已是最新",record:installed};
+  return {code:"update",text:`可更新：${installed.version} → ${pack.version}`,record:installed};
+}
+function renderOnlineFoodPacks(){
+  const box=document.getElementById("onlineFoodPackList");if(!box)return;
+  if(!onlineFoodManifest){
+    box.innerHTML=`<div class="card-subtitle" style="grid-column:1/-1">点击“检查线上资料”后，这里会显示你放在 <code>food-packs/manifest.json</code> 中的资料包。</div>`;
+    return;
+  }
+  if(!onlineFoodManifest.packs.length){
+    box.innerHTML=`<div class="card-subtitle" style="grid-column:1/-1">线上清单目前还没有食材包。</div>`;
+    return;
+  }
+  box.innerHTML=onlineFoodManifest.packs.map(pack=>{
+    const s=onlinePackInstallStatus(pack),downloading=onlineFoodDownloading.has(String(pack.id));
+    const cls=s.code==="current"?"installed":s.code==="update"?"update":"";
+    const buttonText=downloading?"正在添加…":s.code==="current"?"✓ 已是最新":s.code==="update"?"更新资料":"下载并添加";
+    return `<div class="online-pack-card ${cls}">
+      <div class="online-pack-top">
+        <div>
+          <div class="online-pack-name">${escapeHtml(pack.icon||"📦")} ${escapeHtml(pack.name)}</div>
+          <div class="online-pack-meta">${Number(pack.food_count||0)} 种食材${pack.updated_at?` · 更新 ${escapeHtml(pack.updated_at)}`:""}</div>
+        </div>
+        <span class="online-pack-version">v ${escapeHtml(pack.version)}</span>
+      </div>
+      <div class="online-pack-desc">${escapeHtml(pack.description||"公开食材营养资料")}</div>
+      <div class="online-pack-actions">
+        <button class="${s.code==="current"?"secondary-btn":"primary-btn"}" ${downloading||s.code==="current"?"disabled":""} onclick="downloadOnlineFoodPack('${escapeHtml(String(pack.id)).replaceAll("'","&#039;")}')">${buttonText}</button>
+        ${s.record?`<span class="online-pack-installed-note">本机安装：${escapeHtml(String(s.record.version||""))} · ${escapeHtml(String(s.record.food_count||0))} 种</span>`:""}
+      </div>
+      <div class="online-pack-progress" id="onlinePackProgress_${escapeHtml(String(pack.id))}"><div></div></div>
+    </div>`;
+  }).join("");
+}
+function setOnlinePackProgress(packId,pct){
+  const el=document.getElementById(`onlinePackProgress_${packId}`);if(!el)return;
+  el.style.display=pct>=0&&pct<100?"block":"none";
+  const inner=el.firstElementChild;if(inner)inner.style.width=`${Math.max(0,Math.min(100,pct))}%`;
+}
+async function findIndexedFoodByPublicId(publicId){
+  const all=await getAllIndexedFoods();
+  return all.find(f=>String(f.public_food_id||"")===String(publicId))||null;
+}
+async function importOnlineFoodPack(data,manifestPack){
+  let added=0,updated=0,keptUser=0,keptModified=0;
+  const allLocal=await getAllIndexedFoods();
+  const byPublicId=new Map(allLocal.filter(f=>f.public_food_id).map(f=>[String(f.public_food_id),f]));
+  const byName=new Map(allLocal.map(f=>[normalizeFoodName(f.name),f]));
+  for(let i=0;i<data.foods.length;i++){
+    const raw=data.foods[i];
+    const existingPublic=byPublicId.get(String(raw.public_food_id));
+    const existingName=byName.get(normalizeFoodName(raw.name));
+    if(existingPublic?.user_modified){keptModified++;setOnlinePackProgress(manifestPack.id,(i+1)/data.foods.length*100);continue}
+    if(!existingPublic&&existingName&&existingName.source_type!=="public_pack"&&existingName.source_type!=="online_pack"){keptUser++;setOnlinePackProgress(manifestPack.id,(i+1)/data.foods.length*100);continue}
+    const normalized=normalizeImportedFood({
+      id:existingPublic?.id||`of_${String(raw.public_food_id).replace(/[^a-zA-Z0-9_-]/g,"_")}`,
+      name:raw.name,
+      aliases:raw.aliases||[],
+      category:raw.category||"other",
+      nutrition_per_100g:raw.nutrition_per_100g,
+      source:"public_dataset",
+      source_name:data.source_name||manifestPack.source_name||"线上公共食材资料",
+      source_id:raw.source_id||raw.public_food_id,
+      source_note:raw.source_note||""
+    });
+    normalized.public_food_id=String(raw.public_food_id);
+    normalized.pack_id=String(manifestPack.id);
+    normalized.pack_version=String(manifestPack.version);
+    normalized.source_type="online_pack";
+    normalized.user_modified=false;
+    normalized.online_source=true;
+    normalized.updated_at=new Date().toISOString();
+    if(existingPublic){
+      normalized.id=existingPublic.id;
+      normalized.created_at=existingPublic.created_at||normalized.created_at;
+      updated++;
+    }else{
+      added++;
+    }
+    await saveIndexedFood(normalized);
+    byPublicId.set(String(raw.public_food_id),normalized);
+    byName.set(normalizeFoodName(raw.name),normalized);
+    if(i%10===0||i===data.foods.length-1)setOnlinePackProgress(manifestPack.id,(i+1)/data.foods.length*100);
+  }
+  return {added,updated,keptUser,keptModified};
+}
+async function downloadOnlineFoodPack(packId){
+  if(!onlineFoodManifest)return;
+  const pack=onlineFoodManifest.packs.find(p=>String(p.id)===String(packId));if(!pack)return;
+  if(onlineFoodDownloading.has(String(pack.id)))return;
+  onlineFoodDownloading.add(String(pack.id));
+  renderOnlineFoodPacks();
+  setOnlinePackProgress(pack.id,2);
+  try{
+    const url=safeOnlineFoodFileUrl(pack.file);
+    url.searchParams.set("v",String(pack.version));
+    const response=await fetch(url.toString(),{cache:"no-store"});
+    if(!response.ok)throw new Error(`下载失败（HTTP ${response.status}）`);
+    setOnlinePackProgress(pack.id,18);
+    const data=await response.json();
+    setOnlinePackProgress(pack.id,28);
+    validateOnlineFoodPack(data,pack);
+    setOnlinePackProgress(pack.id,36);
+    const result=await importOnlineFoodPack(data,pack);
+    const state=getOnlineFoodPackState();
+    state.installed[String(pack.id)]={
+      version:String(pack.version),
+      food_count:Number(data.foods.length),
+      installed_at:new Date().toISOString(),
+      source_name:data.source_name||pack.source_name||"线上公共食材资料"
+    };
+    state.last_checked=new Date().toISOString();
+    saveOnlineFoodPackState(state);
+    setOnlinePackProgress(pack.id,100);
+    alert(`“${pack.name}”已保存到本机食材库\n\n新增 ${result.added} 种\n更新 ${result.updated} 种\n${result.keptUser} 种与个人食材同名，未覆盖\n${result.keptModified} 种曾由你修改，未覆盖\n\n以后没有网络时，已下载的食材仍可继续使用。`);
+    if(document.getElementById("myFoodLibraryModal")?.classList.contains("show"))await renderMyFoodLibrary();
+  }catch(err){
+    alert(`线上食材资料没有添加成功。\n\n${err.message||"未知错误"}\n\n请确认 GitHub Pages 中 manifest.json 和对应食材包文件可以正常打开。`);
+  }finally{
+    onlineFoodDownloading.delete(String(pack.id));
+    renderOnlineFoodPacks();
+  }
+}
+
 let currentPublicPackId=null;
 let currentPublicPackFilter="all";
 
@@ -3522,6 +3891,12 @@ async function openPublicFoodPacks(){
   document.getElementById("publicFoodPackDetail").style.display="none";
   document.getElementById("publicMarketSearch").value="";
   await renderPublicFoodMarket();
+  renderOnlineFoodPacks();
+  if(location.protocol==="http:"||location.protocol==="https:"){
+    checkOnlineFoodPacks(false);
+  }else{
+    onlineFoodStatus("当前是本地文件模式。上传 GitHub Pages 后即可检查线上食材资料。","");
+  }
 }
 function closePublicFoodPacks(){document.getElementById("publicFoodPackModal").classList.remove("show")}
 function backToPublicFoodMarket(){
@@ -3884,7 +4259,7 @@ async function searchAllBaseFoods(keyword){
 
   const indexed=(await getAllIndexedFoods()).map(f=>({
     id:f.id,name:f.name,aliases:f.aliases||[],category:f.category,
-    nutrition_per_100g:f.nutrition_per_100g,source_type:"user",
+    nutrition_per_100g:f.nutrition_per_100g,source_type:f.source_type==="online_pack"?"online":f.source_type==="public_pack"?"public_pack":"user",
     source:f.source,source_name:f.source_name,score:foodMatchScore(f,q)
   })).filter(x=>!q||x.score<999);
 
@@ -3965,7 +4340,7 @@ async function renderMyFoodLibrary(){
       results.slice(0,50).map(f=>`<div class="my-food-row">
         <div>
           <div class="my-food-name">${escapeHtml(f.name)}
-            <span class="${f.source_type==="system"?"status-badge status-normal":"indexed-food-badge"}">${f.source_type==="system"?"系统自带":"我的食材"}</span>
+            <span class="${f.source_type==="system"?"status-badge status-normal":"indexed-food-badge"}">${f.source_type==="system"?"系统自带":f.source_type==="online"?"在线资料":f.source_type==="public_pack"?"公共扩展":"我的食材"}</span>
           </div>
           <div class="my-food-alias">${(f.aliases||[]).map(escapeHtml).join(" · ")}</div>
         </div>
@@ -7062,11 +7437,209 @@ function renderReminderPage(){
   renderMedicationLogs();
 }
 
+
+const FAMILY_BACKUP_FORMAT="yuni_family_health_backup";
+const FAMILY_BACKUP_SCHEMA=1;
+let pendingFamilyBackup=null;
+
+function getBackupStorageKeys(){
+  return Object.values(STORAGE_KEYS);
+}
+function countBackupValue(value){
+  return Array.isArray(value)?value.length:(value&&typeof value==="object"?Object.keys(value).length:0);
+}
+async function getCurrentBackupSummary(){
+  const indexedFoods=await getAllIndexedFoods();
+  return {
+    members:loadData(STORAGE_KEYS.FAMILY_MEMBERS,[]).length,
+    health:loadData(STORAGE_KEYS.HEALTH_RECORDS,[]).length,
+    diet:loadData(STORAGE_KEYS.DIET_RECORDS,[]).length,
+    reminders:loadData(STORAGE_KEYS.REMINDERS,[]).length,
+    reminder_logs:loadReminderLogs().length,
+    medication_logs:loadData(STORAGE_KEYS.MEDICATION_LOGS,[]).length,
+    dishes:loadData(STORAGE_KEYS.CUSTOM_DISHES,[]).length,
+    foods:indexedFoods.length
+  };
+}
+async function renderBackupPage(){
+  const box=document.getElementById("backupCurrentSummary");if(!box)return;
+  box.innerHTML=`<div class="backup-empty-preview" style="grid-column:1/-1;height:70px">正在统计本机资料…</div>`;
+  const s=await getCurrentBackupSummary();
+  const rows=[
+    ["家庭成员",s.members],["健康记录",s.health],["饮食记录",s.diet],
+    ["提醒计划",s.reminders],["完成记录",s.reminder_logs],["本机食材",s.foods]
+  ];
+  box.innerHTML=rows.map(x=>`<div class="backup-summary-item"><span>${x[0]}</span><strong>${x[1]}</strong></div>`).join("");
+}
+async function sha256Text(text){
+  if(!window.crypto?.subtle)return "";
+  const bytes=new TextEncoder().encode(text);
+  const hash=await crypto.subtle.digest("SHA-256",bytes);
+  return Array.from(new Uint8Array(hash)).map(b=>b.toString(16).padStart(2,"0")).join("");
+}
+async function buildFamilyBackup(reason="manual"){
+  const local_storage={};
+  for(const key of getBackupStorageKeys()){
+    const raw=localStorage.getItem(key);
+    if(raw!==null)local_storage[key]=raw;
+  }
+  const indexed_foods=await getAllIndexedFoods();
+  const summary=await getCurrentBackupSummary();
+  const payload={
+    local_storage,
+    indexed_foods,
+    summary
+  };
+  const payload_json=JSON.stringify(payload);
+  return {
+    backup_format:FAMILY_BACKUP_FORMAT,
+    schema_version:FAMILY_BACKUP_SCHEMA,
+    app_version:typeof APP_VERSION!=="undefined"?APP_VERSION:"unknown",
+    exported_at:new Date().toISOString(),
+    export_reason:reason,
+    checksum_sha256:await sha256Text(payload_json),
+    payload
+  };
+}
+function backupFileName(prefix="家庭健康备份"){
+  const d=new Date();
+  const pad=n=>String(n).padStart(2,"0");
+  return `${prefix}_${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}_${pad(d.getHours())}-${pad(d.getMinutes())}.yunihealth`;
+}
+function triggerBackupDownload(backup,fileName){
+  const blob=new Blob([JSON.stringify(backup,null,2)],{type:"application/json;charset=utf-8"});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement("a");
+  a.href=url;a.download=fileName;document.body.appendChild(a);a.click();a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url),1500);
+}
+async function downloadFamilyBackup(isSafety=false){
+  try{
+    const backup=await buildFamilyBackup(isSafety?"pre_restore":"manual");
+    triggerBackupDownload(backup,backupFileName(isSafety?"恢复前安全备份":"家庭健康备份"));
+    if(!isSafety)alert("备份文件已生成。\n\n请把它保存在你信任的位置。这个文件可能包含家庭成员姓名、健康记录和饮食等私人信息。");
+    return backup;
+  }catch(err){
+    alert(`暂时无法生成备份。\n\n${err.message||"未知错误"}`);
+    throw err;
+  }
+}
+function backupSummaryFromFile(backup){
+  const s=backup?.payload?.summary||{};
+  const ls=backup?.payload?.local_storage||{};
+  const parseCount=key=>{
+    try{const v=JSON.parse(ls[key]||"[]");return Array.isArray(v)?v.length:0}catch(e){return 0}
+  };
+  return {
+    members:Number(s.members??parseCount(STORAGE_KEYS.FAMILY_MEMBERS)),
+    health:Number(s.health??parseCount(STORAGE_KEYS.HEALTH_RECORDS)),
+    diet:Number(s.diet??parseCount(STORAGE_KEYS.DIET_RECORDS)),
+    reminders:Number(s.reminders??parseCount(STORAGE_KEYS.REMINDERS)),
+    reminder_logs:Number(s.reminder_logs??parseCount(STORAGE_KEYS.REMINDER_LOGS)),
+    medication_logs:Number(s.medication_logs??parseCount(STORAGE_KEYS.MEDICATION_LOGS)),
+    dishes:Number(s.dishes??parseCount(STORAGE_KEYS.CUSTOM_DISHES)),
+    foods:Number(s.foods??(Array.isArray(backup?.payload?.indexed_foods)?backup.payload.indexed_foods.length:0))
+  };
+}
+async function validateFamilyBackup(backup){
+  if(!backup||typeof backup!=="object")throw new Error("这不是有效的家庭健康备份文件");
+  if(backup.backup_format!==FAMILY_BACKUP_FORMAT)throw new Error("文件类型不匹配，请选择由本网页生成的家庭健康备份");
+  if(Number(backup.schema_version)!==FAMILY_BACKUP_SCHEMA)throw new Error("这个备份版本暂不受当前网页支持");
+  if(!backup.payload||typeof backup.payload!=="object")throw new Error("备份内容不完整");
+  if(!backup.payload.local_storage||typeof backup.payload.local_storage!=="object")throw new Error("备份缺少家庭健康资料");
+  if(!Array.isArray(backup.payload.indexed_foods))throw new Error("备份缺少本机食材资料");
+  for(const [key,raw] of Object.entries(backup.payload.local_storage)){
+    if(!getBackupStorageKeys().includes(key))continue;
+    if(typeof raw!=="string")throw new Error(`备份中的 ${key} 数据格式异常`);
+    try{JSON.parse(raw)}catch(e){throw new Error(`备份中的 ${key} 无法读取`)}
+  }
+  if(backup.checksum_sha256){
+    const actual=await sha256Text(JSON.stringify(backup.payload));
+    if(actual&&actual!==backup.checksum_sha256)throw new Error("备份完整性检查失败，文件可能被修改或损坏");
+  }
+  return true;
+}
+async function handleBackupFileSelected(event){
+  const file=event.target.files?.[0];
+  const box=document.getElementById("backupRestorePreview");
+  pendingFamilyBackup=null;
+  if(!file){if(box)box.innerHTML='<div class="backup-empty-preview">尚未选择备份文件</div>';return}
+  if(box)box.innerHTML='<div class="backup-empty-preview">正在检查备份文件…</div>';
+  try{
+    if(file.size>80*1024*1024)throw new Error("备份文件过大，超过当前恢复上限");
+    const text=await file.text();
+    const backup=JSON.parse(text);
+    await validateFamilyBackup(backup);
+    pendingFamilyBackup=backup;
+    const s=backupSummaryFromFile(backup);
+    const date=backup.exported_at?new Date(backup.exported_at):null;
+    const when=date&&!Number.isNaN(date.getTime())?date.toLocaleString():"时间未知";
+    box.innerHTML=`
+      <div class="backup-preview-title">✓ 备份文件检查通过</div>
+      <div class="backup-preview-meta">${escapeHtml(file.name)} · 备份时间 ${escapeHtml(when)}</div>
+      <div class="backup-preview-counts">
+        <div class="backup-preview-count">家庭成员 <strong>${s.members}</strong></div>
+        <div class="backup-preview-count">健康记录 <strong>${s.health}</strong></div>
+        <div class="backup-preview-count">饮食记录 <strong>${s.diet}</strong></div>
+        <div class="backup-preview-count">提醒计划 <strong>${s.reminders}</strong></div>
+        <div class="backup-preview-count">完成记录 <strong>${s.reminder_logs}</strong></div>
+        <div class="backup-preview-count">本机食材 <strong>${s.foods}</strong></div>
+      </div>
+      <div class="backup-restore-actions">
+        <label class="backup-safe-check"><input type="checkbox" id="backupSafetyBeforeRestore" checked> 恢复前先下载当前资料的安全备份</label>
+        <button class="primary-btn" type="button" onclick="restorePendingFamilyBackup()">确认恢复</button>
+      </div>`;
+  }catch(err){
+    pendingFamilyBackup=null;
+    if(box)box.innerHTML=`<div style="color:var(--danger);font-size:12px;line-height:1.6"><strong>无法使用这个备份文件</strong><br>${escapeHtml(err.message||"文件格式不正确")}</div>`;
+  }finally{
+    event.target.value="";
+  }
+}
+async function replaceIndexedFoodsForRestore(foods){
+  const db=await openFoodDatabase();
+  await new Promise((resolve,reject)=>{
+    const tx=db.transaction(FOOD_IDB_STORE,"readwrite");
+    const store=tx.objectStore(FOOD_IDB_STORE);
+    store.clear();
+    for(const food of foods){
+      if(food&&typeof food==="object"&&food.id)store.put(food);
+    }
+    tx.oncomplete=()=>resolve();
+    tx.onerror=()=>reject(tx.error||new Error("本机食材恢复失败"));
+    tx.onabort=()=>reject(tx.error||new Error("本机食材恢复被中止"));
+  });
+}
+async function restorePendingFamilyBackup(){
+  if(!pendingFamilyBackup)return;
+  const ok=confirm("恢复会替换这个浏览器中当前的家庭成员、健康记录、饮食、提醒和本机食材。\n\n确定继续吗？");
+  if(!ok)return;
+  try{
+    const safety=document.getElementById("backupSafetyBeforeRestore")?.checked!==false;
+    if(safety)await downloadFamilyBackup(true);
+    await validateFamilyBackup(pendingFamilyBackup);
+    const backup=pendingFamilyBackup;
+    const allowed=new Set(getBackupStorageKeys());
+    for(const key of allowed){
+      if(Object.prototype.hasOwnProperty.call(backup.payload.local_storage,key)){
+        localStorage.setItem(key,backup.payload.local_storage[key]);
+      }else{
+        localStorage.removeItem(key);
+      }
+    }
+    await replaceIndexedFoodsForRestore(backup.payload.indexed_foods);
+    alert("家庭健康资料已恢复完成。\n\n页面将重新载入，以显示恢复后的资料。");
+    location.reload();
+  }catch(err){
+    alert(`恢复没有完成。\n\n${err.message||"未知错误"}\n\n如果恢复前已下载安全备份，可以随时用它恢复。`);
+  }
+}
+
 function initNavigation(){
   document.querySelectorAll(".nav-item").forEach(item=>item.addEventListener("click",function(){
     document.querySelectorAll(".nav-item").forEach(x=>x.classList.remove("active"));this.classList.add("active");document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));
     document.getElementById(`page-${this.dataset.page}`).classList.add("active");pageTitle.textContent=this.dataset.title;
-    if(this.dataset.page==="home")renderHome();if(this.dataset.page==="members")renderMembers();if(this.dataset.page==="health")renderHealthPage();if(this.dataset.page==="diet")requestAnimationFrame(renderDietPage);if(this.dataset.page==="analysis")requestAnimationFrame(renderAnalysisPage);if(this.dataset.page==="reminder")requestAnimationFrame(renderReminderPage);
+    if(this.dataset.page==="home")renderHome();if(this.dataset.page==="members")renderMembers();if(this.dataset.page==="health")renderHealthPage();if(this.dataset.page==="diet")requestAnimationFrame(renderDietPage);if(this.dataset.page==="analysis")requestAnimationFrame(renderAnalysisPage);if(this.dataset.page==="reminder")requestAnimationFrame(renderReminderPage);if(this.dataset.page==="backup")requestAnimationFrame(renderBackupPage);
   }));
 }
 function renderCurrentDate(){const d=new Date(),w=["星期日","星期一","星期二","星期三","星期四","星期五","星期六"];currentDate.textContent=`${formatDate(d)} · ${w[d.getDay()]}`}
