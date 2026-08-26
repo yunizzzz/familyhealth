@@ -3,12 +3,14 @@
   "updated_at": "2026-08-26",
   "packs": [
     {
-      "id": "test_foods",
-      "name": "测试食材包",
-      "version": "2026.08.1",
-      "file": "test-foods.json",
-      "food_count": 3,
-      "description": "用于验证在线下载与离线保存功能"
+      "id": "usda_foundation_2026_04_30",
+      "name": "USDA 基础食材资料",
+      "version": "2026.04.30",
+      "file": "usda-foundation-2026.json",
+      "food_count": 318,
+      "description": "USDA FoodData Central Foundation Foods，已转换为当前网页可直接下载的每100g营养食材包。",
+      "updated_at": "2026-04-30",
+      "source_name": "USDA FoodData Central Foundation Foods"
     }
   ]
 }
