@@ -1,0 +1,75 @@
+{
+  "pack_id": "test_foods",
+  "name": "测试食材包",
+  "version": "2026.08.1",
+  "updated_at": "2026-08-26",
+  "source_name": "测试数据，仅用于验证下载流程",
+  "foods": [
+    {
+      "public_food_id": "test_apple",
+      "name": "苹果",
+      "aliases": ["红苹果"],
+      "category": "fruit",
+      "nutrition_per_100g": {
+        "cal": 52,
+        "protein": 0.3,
+        "fat": 0.2,
+        "carb": 13.8,
+        "fiber": 2.4,
+        "calcium": 6,
+        "iron": 0.1,
+        "zinc": 0.04,
+        "magnesium": 5,
+        "potassium": 107,
+        "sodium": 1,
+        "va": 3,
+        "vc": 4.6,
+        "vd": 0
+      }
+    },
+    {
+      "public_food_id": "test_oat",
+      "name": "燕麦",
+      "aliases": ["燕麦片"],
+      "category": "grain",
+      "nutrition_per_100g": {
+        "cal": 389,
+        "protein": 16.9,
+        "fat": 6.9,
+        "carb": 66.3,
+        "fiber": 10.6,
+        "calcium": 54,
+        "iron": 4.7,
+        "zinc": 4,
+        "magnesium": 177,
+        "potassium": 429,
+        "sodium": 2,
+        "va": 0,
+        "vc": 0,
+        "vd": 0
+      }
+    },
+    {
+      "public_food_id": "test_broccoli",
+      "name": "西兰花",
+      "aliases": ["青花菜"],
+      "category": "vegetable",
+      "nutrition_per_100g": {
+        "cal": 34,
+        "protein": 2.8,
+        "fat": 0.4,
+        "carb": 6.6,
+        "fiber": 2.6,
+        "calcium": 47,
+        "iron": 0.7,
+        "zinc": 0.4,
+        "magnesium": 21,
+        "potassium": 316,
+        "sodium": 33,
+        "va": 31,
+        "vc": 89.2,
+        "vd": 0
+      }
+    }
+  ]
+}
