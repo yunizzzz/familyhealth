@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>HealthWebsite 注册测试</title>
+  <meta http-equiv="Cache-Control" content="no-store" />
+  <style>
+    *{box-sizing:border-box} body{margin:0;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;background:#f5f8f5;color:#183128;min-height:100vh;display:grid;place-items:center;padding:24px}.card{width:min(520px,100%);background:#fff;border:1px solid #dfe9e1;border-radius:20px;padding:28px;box-shadow:0 18px 50px rgba(34,79,55,.08)}h1{margin:0 0 8px;font-size:26px}.sub{margin:0 0 24px;color:#6f8278;font-size:14px;line-height:1.7}label{display:block;font-size:13px;font-weight:700;margin:14px 0 6px}input{width:100%;padding:13px 14px;border:1px solid #d8e4db;border-radius:11px;font-size:15px;outline:none}input:focus{border-color:#3ea06d;box-shadow:0 0 0 3px rgba(62,160,109,.1)}button{width:100%;margin-top:20px;padding:13px 16px;border:0;border-radius:11px;background:#3ea06d;color:#fff;font-size:15px;font-weight:800;cursor:pointer}button:disabled{opacity:.55;cursor:not-allowed}.status{display:none;margin-top:16px;padding:13px 14px;border-radius:11px;font-size:13px;line-height:1.65;white-space:pre-wrap}.ok{display:block;background:#eef8f1;border:1px solid #cfe7d6;color:#20683d}.err{display:block;background:#fff3f2;border:1px solid #f0d2cf;color:#9a302a}.note{margin-top:20px;padding-top:18px;border-top:1px solid #edf1ee;color:#819087;font-size:12px;line-height:1.7}code{background:#f2f5f3;padding:2px 5px;border-radius:5px}
+  </style>
+</head>
+<body>
+  <main class="card">
+    <h1>HealthWebsite 注册测试</h1>
+    <p class="sub">这个页面只用于验证 Supabase 注册 → 邮箱确认 → 自动创建 user_profile 的链路。测试通过后即可删除。</p>
+    <form id="signupForm">
+      <label for="email">邮箱</label>
+      <input id="email" type="email" autocomplete="email" required placeholder="例如：test@example.com" />
+      <label for="nickname">昵称</label>
+      <input id="nickname" type="text" maxlength="40" required placeholder="例如：测试用户" />
+      <label for="password">密码</label>
+      <input id="password" type="password" minlength="8" autocomplete="new-password" required placeholder="至少 8 位" />
+      <button id="submitBtn" type="submit">注册测试账号</button>
+    </form>
+    <div id="status" class="status"></div>
+    <div class="note">注册后请去邮箱点击 Supabase 的 <b>Confirm email address</b>。邮箱确认后会跳回：<code>https://yunizzzz.github.io/familyhealth/</code></div>
+  </main>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    const SUPABASE_URL = "https://kcakzzrwdsjtpmtqgvvn.supabase.co";
+    const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_UaJZAZqNLU408Bc7iKm6Hg_5Fq5DUiJ";
+    const REDIRECT_URL = "https://yunizzzz.github.io/familyhealth/";
+    const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
+    const form = document.getElementById("signupForm");
+    const btn = document.getElementById("submitBtn");
+    const statusEl = document.getElementById("status");
+    function showStatus(message, type){ statusEl.className = "status " + type; statusEl.textContent = message; }
+    form.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      const email = document.getElementById("email").value.trim();
+      const nickname = document.getElementById("nickname").value.trim();
+      const password = document.getElementById("password").value;
+      if (!nickname) { showStatus("请填写昵称。", "err"); return; }
+      btn.disabled = true; btn.textContent = "正在注册…"; showStatus("正在提交注册请求…", "ok");
+      try {
+        const { data, error } = await sb.auth.signUp({
+          email,
+          password,
+          options: { emailRedirectTo: REDIRECT_URL, data: { nickname } }
+        });
+        if (error) throw error;
+        const userId = data?.user?.id || "（暂未返回）";
+        showStatus(
+          "注册请求已成功提交。\n\n" +
+          "下一步：请打开 " + email + " 的收件箱，找到 Supabase 的确认邮件，并点击 “Confirm email address”。\n\n" +
+          "Supabase 用户 ID：\n" + userId + "\n\n" +
+          "点击确认邮件之前，user_profile 中原则上不应出现这位用户；确认成功后，Trigger 才会自动创建个人档案和 8 位 health_id。",
+          "ok"
+        );
+      } catch (err) {
+        console.error(err);
+        showStatus("注册失败：\n" + (err?.message || String(err)) + "\n\n如果这个邮箱以前注册过，请换一个从未在这个 Supabase 项目里注册过的测试邮箱。", "err");
+      } finally { btn.disabled = false; btn.textContent = "注册测试账号"; }
+    });
+  </script>
+</body>
+</html>
