@@ -2444,6 +2444,8 @@ function currentAccountMemberId(){
   return currentSupabaseUser ? `account_${currentSupabaseUser.id}` : "";
 }
 
+const STORAGE_KEYS={FAMILY_MEMBERS:"family_member_list",HEALTH_RECORDS:"health_index_record",DIET_RECORDS:"diet_nutrition_record",CUSTOM_DISHES:"custom_dish_library",REMINDERS:"health_remind_list",REMINDER_LOGS:"health_reminder_logs",MEDICATION_LOGS:"medication_execution_logs",STREAK_PROTECTION:"health_streak_protection",ONLINE_FOOD_PACKS:"online_food_pack_state",IDENTITY:"yuni_identity_demo",FAMILY_RELATIONS:"yuni_family_relations_demo",FAMILY_INVITES:"yuni_family_invites_demo",SHARE_PERMISSIONS:"yuni_share_permissions_demo",SYNC_META:"yuni_sync_meta_demo",GLOBAL_CONFIG:"health_global_config"};
+
 const MANAGED_STATE_KEYS=new Set([
   STORAGE_KEYS.FAMILY_MEMBERS,
   STORAGE_KEYS.HEALTH_RECORDS,
@@ -2772,7 +2774,7 @@ async function initializeSupabaseAuth(){
 }
 
 
-const STORAGE_KEYS={FAMILY_MEMBERS:"family_member_list",HEALTH_RECORDS:"health_index_record",DIET_RECORDS:"diet_nutrition_record",CUSTOM_DISHES:"custom_dish_library",REMINDERS:"health_remind_list",REMINDER_LOGS:"health_reminder_logs",MEDICATION_LOGS:"medication_execution_logs",STREAK_PROTECTION:"health_streak_protection",ONLINE_FOOD_PACKS:"online_food_pack_state",IDENTITY:"yuni_identity_demo",FAMILY_RELATIONS:"yuni_family_relations_demo",FAMILY_INVITES:"yuni_family_invites_demo",SHARE_PERMISSIONS:"yuni_share_permissions_demo",SYNC_META:"yuni_sync_meta_demo",GLOBAL_CONFIG:"health_global_config"};
+
 function loadData(key,def=[]){try{const v=localStorage.getItem(key);return v===null?def:JSON.parse(v)}catch(e){return def}}
 let suppressManagedStateCloudWrite=false;
 let managedStateSaveTimer=null;
