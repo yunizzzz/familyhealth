@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>家庭健康管理系统</title>
   <script src="https://cdn.jsdelivr.net/npm/echarts"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
     *{margin:0;padding:0;box-sizing:border-box}
     :root{
@@ -691,9 +692,184 @@
     @media(max-width:900px){.backup-grid{grid-template-columns:1fr}.backup-includes{grid-template-columns:repeat(2,minmax(0,1fr))}}
     @media(max-width:600px){.backup-summary-grid,.backup-includes{grid-template-columns:1fr 1fr}.backup-preview-counts{grid-template-columns:1fr}}
 
+
+    /* 身份、公开名片、家庭共享 */
+    .topbar-right{display:flex;align-items:center;gap:16px}
+    .topbar-user-chip{border:1px solid var(--border);background:#fff;border-radius:12px;padding:6px 9px;display:flex;align-items:center;gap:8px;color:var(--text-main)}
+    .topbar-user-chip:hover{border-color:#c8dccc;box-shadow:var(--shadow)}
+    .topbar-user-avatar{width:31px;height:31px;border-radius:10px;background:var(--primary-light);color:var(--primary-dark);display:grid;place-items:center;font-weight:800;font-size:12px}
+    .topbar-user-text{display:flex;flex-direction:column;align-items:flex-start}.topbar-user-text strong{font-size:11px}.topbar-user-text small{font-size:9px;color:var(--text-light);margin-top:2px}
+    .page-header-actions{display:flex;gap:8px;flex-wrap:wrap}
+    .family-overview-card{margin-bottom:18px}
+    .family-overview-inner{display:flex;align-items:center;justify-content:space-between;gap:18px;background:linear-gradient(135deg,#fff,#f7fbf8);border:1px solid #d7e7dc;border-radius:15px;padding:17px 18px}
+    .family-overview-title{font-size:15px;font-weight:800}.family-overview-meta{font-size:11px;color:var(--text-secondary);margin-top:5px}
+    .family-overview-actions{display:flex;gap:8px;flex-wrap:wrap}
+    .account-bind-badge{display:inline-flex;align-items:center;gap:4px;margin-top:7px;padding:4px 7px;border-radius:999px;font-size:9px;font-weight:800;background:#eef5f0;color:var(--primary-dark)}
+    .account-bind-badge.unbound{background:#f2f3f2;color:var(--text-light)}
+    .identity-page-header{align-items:flex-end}.identity-demo-badge{display:inline-flex;padding:5px 8px;border-radius:999px;background:#fff4d9;color:#8a6412;font-size:10px;font-weight:800;margin-bottom:8px}
+    .identity-tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:18px;padding:5px;background:#edf3ef;border-radius:12px;width:max-content;max-width:100%}
+    .identity-tab{border:none;background:transparent;padding:9px 13px;border-radius:9px;font-size:12px;color:var(--text-secondary);font-weight:700}
+    .identity-tab.active{background:#fff;color:var(--primary-dark);box-shadow:0 2px 8px rgba(55,88,66,.08)}
+    .identity-panel{display:none}.identity-panel.active{display:block}
+    .identity-me-grid,.identity-public-layout,.identity-family-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:20px}
+    .identity-profile-hero{display:flex;align-items:center;gap:15px}
+    .identity-big-avatar{width:68px;height:68px;border-radius:19px;background:var(--primary-light);display:grid;place-items:center;font-size:25px;font-weight:800;color:var(--primary-dark)}
+    .identity-name{font-size:22px;font-weight:800}.yuni-id-row{display:flex;align-items:center;gap:7px;margin-top:5px;font-size:11px;color:var(--text-secondary)}
+    .copy-id-btn{border:none;background:#eef5f0;color:var(--primary-dark);padding:4px 7px;border-radius:7px;font-size:9px;font-weight:800}
+    .identity-bio{margin-top:14px;padding:12px;border-radius:11px;background:#f8faf9;font-size:12px;color:var(--text-secondary);line-height:1.6}
+    .identity-profile-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+    .identity-health-overview{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;margin-top:13px}
+    .identity-health-stat{padding:12px;border:1px solid var(--border);border-radius:11px;background:#fbfcfb}
+    .identity-health-stat span{font-size:9px;color:var(--text-light);display:block}.identity-health-stat strong{font-size:15px;display:block;margin-top:4px}
+    .identity-shortcuts{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px}
+    .identity-shortcuts button{border:1px solid var(--border);background:#fff;border-radius:12px;padding:13px;text-align:left}
+    .identity-shortcuts button:hover{border-color:#cddfd3;background:#fbfdfb}.identity-shortcuts span{font-size:20px;display:block}.identity-shortcuts strong{display:block;margin-top:8px;font-size:12px}.identity-shortcuts small{display:block;margin-top:4px;color:var(--text-light);font-size:9px}
+    .identity-form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:17px}
+    .public-toggle-list{display:flex;flex-direction:column;gap:8px;margin:16px 0}
+    .public-toggle-list label{display:flex;justify-content:space-between;gap:14px;align-items:center;padding:11px 12px;border:1px solid var(--border);border-radius:10px}
+    .public-toggle-list strong{font-size:11px;display:block}.public-toggle-list small{display:block;color:var(--text-light);font-size:9px;margin-top:3px}
+    .public-profile-card{max-width:380px;margin:18px auto 0;padding:22px;border:1px solid #dce8df;border-radius:18px;background:linear-gradient(160deg,#fff,#f8fcf9);text-align:center}
+    .public-profile-avatar{width:76px;height:76px;margin:0 auto;border-radius:22px;background:var(--primary-light);display:grid;place-items:center;font-size:28px;font-weight:800;color:var(--primary-dark)}
+    .public-profile-name{font-size:20px;font-weight:800;margin-top:12px}.public-profile-id{font-size:11px;color:var(--text-secondary);margin-top:5px}
+    .public-profile-bio{font-size:12px;color:var(--text-secondary);line-height:1.6;margin:13px auto 0;max-width:280px}
+    .public-profile-meta{display:flex;justify-content:center;gap:8px;flex-wrap:wrap;margin-top:13px}.public-profile-meta span{padding:5px 8px;border-radius:999px;background:#f1f5f2;font-size:9px;color:var(--text-secondary)}
+    .public-private-note{font-size:9px;color:var(--text-light);margin-top:14px;padding-top:12px;border-top:1px solid var(--border)}
+    .identity-search-row{display:flex;gap:8px;margin-top:15px}.identity-search-row .form-control{flex:1}
+    .identity-demo-tip{margin-top:8px;font-size:9px;color:var(--text-light)}.identity-demo-tip button{border:none;background:none;color:var(--primary-dark);font-size:9px;text-decoration:underline}
+    .family-search-result{margin-top:14px}
+    .searched-user-card{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:13px;border:1px solid var(--border);border-radius:12px;background:#fbfcfb}
+    .searched-user-main{display:flex;align-items:center;gap:10px}.searched-user-avatar{width:42px;height:42px;border-radius:12px;background:#eef5f0;display:grid;place-items:center;font-weight:800}
+    .searched-user-name{font-weight:800;font-size:12px}.searched-user-id{font-size:9px;color:var(--text-light);margin-top:4px}
+    .family-summary-box{margin-top:15px}.family-summary-title{font-size:16px;font-weight:800}.family-summary-row{display:flex;justify-content:space-between;gap:10px;padding:10px 0;border-bottom:1px solid var(--border);font-size:11px}
+    .invite-columns{display:grid;grid-template-columns:1fr 1fr;gap:18px}.invite-columns h4{font-size:12px;margin-bottom:9px}
+    .invite-card{padding:12px;border:1px solid var(--border);border-radius:11px;margin-bottom:8px;background:#fbfcfb}.invite-card-top{display:flex;justify-content:space-between;gap:10px}.invite-card strong{font-size:11px}.invite-card small{display:block;color:var(--text-light);font-size:9px;margin-top:4px}.invite-actions{display:flex;gap:7px;margin-top:9px}
+    .permission-groups{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:17px}.permission-group{border:1px solid var(--border);border-radius:12px;padding:13px}.permission-group h4{font-size:12px;margin-bottom:8px}
+    .permission-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:9px 0;border-bottom:1px solid #eef2ef}.permission-row:last-child{border-bottom:none}.permission-row span{font-size:10px}.permission-row small{display:block;color:var(--text-light);margin-top:2px}
+    .privacy-rule-banner{margin-top:14px;padding:12px;border-radius:10px;background:#f7faf8;font-size:10px;line-height:1.6;color:var(--text-secondary)}
+    .sync-head{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}.sync-demo-label{padding:5px 8px;border-radius:999px;background:#fff4d9;color:#8a6412;font-size:9px;font-weight:800}
+    .sync-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:16px 0}.sync-stat{padding:12px;border-radius:11px;border:1px solid var(--border);background:#fafcfb}.sync-stat span{display:block;font-size:9px;color:var(--text-light)}.sync-stat strong{display:block;font-size:16px;margin-top:5px}
+    .sync-card>.secondary-btn{margin-left:7px}.sync-result-box{margin-top:13px}
+    .sync-result{padding:12px;border-radius:10px;background:#f7faf8;border:1px solid var(--border);font-size:10px;line-height:1.7}
+    .conflict-card{border:1px solid #ead7b0;border-radius:12px;padding:14px;background:#fffdf8}.conflict-compare{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}.conflict-side{padding:12px;border:1px solid var(--border);border-radius:10px;background:#fff}.conflict-side span{font-size:9px;color:var(--text-light)}.conflict-side strong{display:block;font-size:19px;margin-top:5px}
+    .family-health-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:14px}.family-health-item{padding:12px;border-radius:11px;border:1px solid var(--border);background:#fbfcfb}.family-health-item span{font-size:9px;color:var(--text-light)}.family-health-item strong{display:block;font-size:14px;margin-top:5px}
+    .locked-health-item{opacity:.58}.locked-health-item strong{font-size:11px;color:var(--text-light)}
+    @media(max-width:1000px){.identity-shortcuts{grid-template-columns:repeat(3,minmax(0,1fr))}}
+    @media(max-width:800px){.identity-me-grid,.identity-public-layout,.identity-family-grid,.invite-columns,.permission-groups{grid-template-columns:1fr}.identity-shortcuts{grid-template-columns:repeat(2,minmax(0,1fr))}.topbar-user-text{display:none}}
+    @media(max-width:600px){.topbar-right{gap:7px}.topbar-date{display:none}.identity-health-overview,.sync-stats,.family-health-grid{grid-template-columns:1fr}.identity-form-grid{grid-template-columns:1fr}}
+
+
+    .family-entry-explain{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:18px}
+    .family-entry-explain>div{display:grid;grid-template-columns:36px 1fr;column-gap:10px;align-items:center;padding:14px;border:1px solid var(--border);border-radius:13px;background:#fff}
+    .family-entry-explain span{grid-row:1/3;width:36px;height:36px;border-radius:10px;background:var(--primary-lighter);display:grid;place-items:center;font-size:17px}
+    .family-entry-explain strong{font-size:12px}.family-entry-explain small{font-size:9px;line-height:1.55;color:var(--text-light);margin-top:2px}
+    .family-invite-manager{margin-top:20px}.family-invite-grid{display:grid;grid-template-columns:1.15fr .85fr;gap:18px}
+    .family-invite-search-panel{padding-right:4px}
+    .data-mode-cards{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px}
+    .data-mode-card{display:flex;align-items:center;gap:12px;padding:15px;border:1px solid var(--border);border-radius:13px;background:#fff}
+    .data-mode-card>span{width:40px;height:40px;border-radius:11px;display:grid;place-items:center;font-size:20px;background:var(--primary-lighter)}
+    .data-mode-card.cloud>span{background:#eef4fb}.data-mode-card strong{display:block;font-size:12px}.data-mode-card small{display:block;margin-top:4px;font-size:9px;line-height:1.55;color:var(--text-light)}
+    .backup-sync-card{margin-bottom:20px}.sync-actions-row{display:flex;gap:8px;flex-wrap:wrap}
+    .identity-purpose-card{margin-top:0}.identity-purpose-card .identity-shortcuts{grid-template-columns:repeat(3,minmax(0,1fr))}
+    @media(max-width:800px){.family-entry-explain,.family-invite-grid,.data-mode-cards{grid-template-columns:1fr}}
+
+
+    body.personal-space-mode .sidebar,body.personal-space-mode .topbar{display:none!important}
+    body.personal-space-mode .main{margin-left:0!important;width:100%!important}
+    body.personal-space-mode .content{padding:0!important;max-width:none!important}
+    body.personal-space-mode #page-identity{display:block!important;min-height:100vh;background:var(--bg)}
+    .personal-space-shell{min-height:100vh}.personal-space-topbar{height:70px;display:flex;align-items:center;justify-content:space-between;padding:0 34px;border-bottom:1px solid var(--border);background:rgba(255,255,255,.96);position:sticky;top:0;z-index:50}
+    .personal-back-btn{border:1px solid var(--border);background:#fff;border-radius:10px;padding:9px 13px;font-size:11px;color:var(--text-main)}
+    .personal-space-brand{display:flex;align-items:center;gap:9px}.personal-mini-avatar{width:34px;height:34px;border-radius:10px;background:var(--primary-light);color:var(--primary-dark);display:grid;place-items:center;font-weight:800}
+    .personal-space-brand strong{display:block;font-size:11px}.personal-space-brand small{display:block;font-size:9px;color:var(--text-light);margin-top:2px}
+    .personal-space-content{max-width:1180px;margin:0 auto;padding:28px 34px 42px}.public-editor-single{display:flex}.public-editor-card{width:min(820px,100%)}
+    .public-settings-heading{font-size:12px;font-weight:800;margin:18px 0 9px}.public-editor-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px}
+    .privacy-hard-rule{margin-top:14px;padding:12px 13px;border-radius:10px;background:#f7faf8;border:1px solid #e0ebe3;font-size:10px;line-height:1.65;color:var(--text-secondary)}
+    .toggle-wrap{position:relative;display:inline-flex;width:42px;height:24px;flex:0 0 auto}.toggle-wrap input{position:absolute;opacity:0}.toggle-wrap i{position:absolute;inset:0;border-radius:999px;background:#d9dfdb;transition:.18s}
+    .toggle-wrap i:after{content:"";position:absolute;width:18px;height:18px;top:3px;left:3px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.16);transition:.18s}
+    .toggle-wrap input:checked+i{background:var(--primary)}.toggle-wrap input:checked+i:after{transform:translateX(18px)}
+    .join-family-step{display:flex;gap:10px;align-items:flex-start;padding:10px 0;border-bottom:1px solid var(--border)}.join-family-step:last-child{border-bottom:none}
+    .join-family-step>span{width:30px;height:30px;border-radius:9px;background:#f2f7f3;display:grid;place-items:center;flex:0 0 auto}.join-family-step strong{display:block;font-size:11px}.join-family-step small{display:block;margin-top:3px;font-size:9px;color:var(--text-light)}
+    .family-invite-records-title{font-size:13px;font-weight:800;margin:20px 0 10px;padding-top:15px;border-top:1px solid var(--border)}
+    @media(max-width:800px){.personal-space-topbar{padding:0 16px}.personal-space-content{padding:20px 16px 34px}.family-invite-grid{grid-template-columns:1fr}}
+
+
+    /* Supabase 账号登录层：第一阶段只接账号与 user_profile，健康业务数据暂保留原本地逻辑 */
+    body.auth-locked{overflow:hidden}
+    body.auth-locked>.sidebar,body.auth-locked>.main{filter:blur(2px);pointer-events:none;user-select:none}
+    .auth-gate{position:fixed;inset:0;z-index:20000;display:none;align-items:center;justify-content:center;padding:24px;background:linear-gradient(135deg,rgba(244,250,246,.97),rgba(234,246,239,.98))}
+    .auth-gate.show{display:flex}
+    .auth-shell{width:min(460px,100%);background:#fff;border:1px solid var(--border);border-radius:22px;box-shadow:0 22px 70px rgba(38,90,61,.15);padding:28px}
+    .auth-brand{display:flex;align-items:center;gap:12px;margin-bottom:22px}
+    .auth-brand-icon{width:46px;height:46px;border-radius:14px;background:var(--primary);color:#fff;display:grid;place-items:center;font-size:24px;font-weight:800}
+    .auth-brand h2{font-size:21px}.auth-brand p{font-size:12px;color:var(--text-secondary);margin-top:4px}
+    .auth-tabs{display:grid;grid-template-columns:1fr 1fr;gap:6px;padding:5px;border-radius:12px;background:#f1f5f2;margin-bottom:20px}
+    .auth-tab{border:none;background:transparent;border-radius:9px;padding:10px;color:var(--text-secondary);font-weight:700;font-size:13px}
+    .auth-tab.active{background:#fff;color:var(--primary-dark);box-shadow:0 2px 8px rgba(55,88,66,.08)}
+    .auth-panel{display:none}.auth-panel.active{display:block}
+    .auth-panel .form-group{margin-bottom:13px}
+    .auth-submit{width:100%;margin-top:4px}
+    .auth-status{display:none;margin-top:14px;padding:11px 12px;border-radius:10px;font-size:12px;line-height:1.6;white-space:pre-wrap}
+    .auth-status.ok{display:block;background:var(--success-light);color:var(--primary-dark);border:1px solid #cfe7d6}
+    .auth-status.error{display:block;background:var(--danger-light);color:#a23c38;border:1px solid #f0d2cf}
+    .auth-note{margin-top:16px;padding-top:14px;border-top:1px solid var(--border);font-size:11px;line-height:1.65;color:var(--text-light)}
+    .auth-loading{position:fixed;inset:0;z-index:20001;display:none;place-items:center;background:rgba(245,248,246,.88);backdrop-filter:blur(3px)}
+    .auth-loading.show{display:grid}
+    .auth-loading-box{padding:16px 20px;border-radius:14px;background:#fff;border:1px solid var(--border);box-shadow:var(--shadow);font-size:13px;color:var(--text-secondary)}
+    .topbar-logout-btn{border:1px solid var(--border);background:#fff;color:var(--text-secondary);border-radius:10px;padding:9px 11px;font-size:11px}
+    .topbar-logout-btn:hover{border-color:#d9b9b6;color:var(--danger);background:var(--danger-light)}
+    @media(max-width:600px){.auth-shell{padding:22px}.topbar-logout-btn{padding:8px 9px}}
+
 </style>
 </head>
 <body>
+
+<div class="auth-gate" id="authGate" aria-live="polite">
+  <div class="auth-shell">
+    <div class="auth-brand">
+      <div class="auth-brand-icon">+</div>
+      <div><h2>家庭健康管理</h2><p>使用 Supabase 账号登录</p></div>
+    </div>
+
+    <div class="auth-tabs">
+      <button class="auth-tab active" id="authLoginTab" type="button" onclick="switchAuthMode('login')">登录</button>
+      <button class="auth-tab" id="authSignupTab" type="button" onclick="switchAuthMode('signup')">注册</button>
+    </div>
+
+    <form class="auth-panel active" id="authLoginPanel" onsubmit="handleSupabaseLogin(event)">
+      <div class="form-group">
+        <label class="form-label">邮箱</label>
+        <input class="form-control" id="authLoginEmail" type="email" autocomplete="email" required placeholder="请输入邮箱">
+      </div>
+      <div class="form-group">
+        <label class="form-label">密码</label>
+        <input class="form-control" id="authLoginPassword" type="password" autocomplete="current-password" required placeholder="请输入密码">
+      </div>
+      <button class="primary-btn auth-submit" id="authLoginBtn" type="submit">登录</button>
+    </form>
+
+    <form class="auth-panel" id="authSignupPanel" onsubmit="handleSupabaseSignup(event)">
+      <div class="form-group">
+        <label class="form-label">邮箱</label>
+        <input class="form-control" id="authSignupEmail" type="email" autocomplete="email" required placeholder="请输入邮箱">
+      </div>
+      <div class="form-group">
+        <label class="form-label">昵称 <span class="required">*</span></label>
+        <input class="form-control" id="authSignupNickname" type="text" maxlength="40" required placeholder="例如：小云">
+        <div class="input-hint">注册后可在“我的主页”修改昵称。</div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">密码</label>
+        <input class="form-control" id="authSignupPassword" type="password" minlength="8" autocomplete="new-password" required placeholder="至少 8 位">
+      </div>
+      <button class="primary-btn auth-submit" id="authSignupBtn" type="submit">创建账号</button>
+    </form>
+
+    <div class="auth-status" id="authStatus"></div>
+    <div class="auth-note">注册后需要先完成邮箱确认。确认成功后再回到本网站登录。请勿把 service_role / secret key 放进网页。</div>
+  </div>
+</div>
+<div class="auth-loading" id="authLoading"><div class="auth-loading-box" id="authLoadingText">正在连接 Supabase…</div></div>
+
 
 <aside class="sidebar">
   <div class="logo">
@@ -707,18 +883,25 @@
     <button class="nav-item" data-page="diet" data-title="饮食营养"><span class="nav-icon">🥗</span>饮食营养</button>
     <button class="nav-item" data-page="analysis" data-title="健康分析"><span class="nav-icon">📈</span>健康分析</button>
     <button class="nav-item" data-page="reminder" data-title="健康提醒"><span class="nav-icon">🔔</span>健康提醒</button>
-    <button class="nav-item" data-page="backup" data-title="资料备份"><span class="nav-icon">🛡️</span>资料备份</button>
+    <button class="nav-item" data-page="backup" data-title="资料与同步"><span class="nav-icon">🛡️</span>资料与同步</button>
   </nav>
   <div class="sidebar-footer">
-    <div class="sidebar-footer-title">本地数据存储</div>
-    <div class="sidebar-footer-text">私人健康资料保存在当前浏览器的本地存储中，不上传到 GitHub。</div>
+    <div class="sidebar-footer-title">账号已接入 Supabase</div>
+    <div class="sidebar-footer-text">登录身份与个人资料已连接云端；健康、饮食和提醒数据将在下一阶段逐步迁移。</div>
   </div>
 </aside>
 
 <main class="main">
 <header class="topbar">
   <div class="topbar-title" id="pageTitle">首页</div>
-  <div class="topbar-date" id="currentDate"></div>
+  <div class="topbar-right">
+    <div class="topbar-date" id="currentDate"></div>
+    <button class="topbar-user-chip" type="button" onclick="openIdentityPage('me')" title="打开我的主页">
+      <span class="topbar-user-avatar" id="topbarUserAvatar">我</span>
+      <span class="topbar-user-text"><strong id="topbarUserName">我的主页</strong><small id="topbarUserId">账号未连接</small></span>
+    </button>
+    <button class="topbar-logout-btn" id="topbarLogoutBtn" type="button" onclick="supabaseSignOut()" style="display:none">退出</button>
+  </div>
 </header>
 
 <div class="content">
@@ -880,12 +1063,39 @@
 </section>
 
 <section class="page" id="page-members">
-  <div class="page-header"><div><h2>家庭成员</h2><p>管理家庭成员基础档案和健康信息。</p></div><button class="primary-btn" onclick="openMemberModal()">+ 新增成员</button></div>
+  <div class="page-header">
+    <div><h2>家庭成员</h2><p>管理家庭成员健康档案，也可以邀请家人自己加入并按权限共享健康资料。</p></div>
+    <div class="page-header-actions"><button class="secondary-btn" onclick="scrollToFamilyInvite()">邀请家人加入</button><button class="primary-btn" onclick="openMemberModal()">+ 新增健康档案</button></div>
+  </div>
+  <div class="family-overview-card" id="familyOverviewCard"></div>
+  <div class="family-entry-explain">
+    <div><span>＋</span><strong>新增健康档案</strong><small>适合老人、儿童或暂时不使用本应用的家人，由你代为记录。</small></div>
+    <div><span>👤</span><strong>邀请家人加入</strong><small>适合已经拥有账号的家人，对方接受后可以自己记录并按权限共享。</small></div>
+  </div>
   <div class="member-grid" id="memberGrid"></div>
+  <div class="card family-invite-manager" id="familyInviteManager">
+    <div class="card-header"><div><div class="card-title">邀请家人一起使用</div><div class="card-subtitle">家人已经有账号？输入对方的用户 ID 找到他并发送邀请。对方接受后，就会加入“我的家”。</div></div><span class="identity-demo-badge">Supabase 已连接</span></div>
+    <div class="family-invite-grid">
+      <div class="family-invite-search-panel">
+        <div class="form-label">查找用户</div>
+        <div class="identity-search-row"><input class="form-control" id="familySearchYuniId" placeholder="输入 8 位用户 ID，例如：23736348"><button class="primary-btn" onclick="searchDemoYuniUser()">查找</button></div>
+        <div class="identity-demo-tip">只会显示对方允许公开的资料；不会显示邮箱、生日或健康数据。</div>
+        <div id="familySearchResult" class="family-search-result"></div>
+      </div>
+      <div class="join-family-explain">
+        <div class="form-label">加入家庭后会发生什么？</div>
+        <div class="join-family-step"><span>👨‍👩‍👧</span><div><strong>成为家庭成员</strong><small>对方接受邀请后，会加入“我的家”。</small></div></div>
+        <div class="join-family-step"><span>👁</span><div><strong>按权限查看健康信息</strong><small>家庭成员可以查看彼此主动共享的健康资料。</small></div></div>
+        <div class="join-family-step"><span>🔐</span><div><strong>私人资料仍然受保护</strong><small>加入家庭不等于开放全部健康数据。</small></div></div>
+      </div>
+    </div>
+    <div class="family-invite-records-title">家庭邀请</div>
+    <div class="invite-columns"><div><h4>收到的邀请</h4><div id="receivedInviteList"></div></div><div><h4>发出的邀请</h4><div id="sentInviteList"></div></div></div>
+  </div>
 </section>
 
 <section class="page" id="page-health">
-  <div class="page-header"><div><h2>健康记录</h2><p>身高、体重优先录入，并按成员年龄、性别和最新体格数据给出更合适的参考提示。</p></div></div>
+  <div class="page-header"><div><h2>健康记录</h2><p>当前登录账号“本人”的健康记录已连接 Supabase；其他本地代管档案暂时继续保存在浏览器。</p></div></div>
 
   <div class="card health-toolbar">
     <div class="toolbar-field">
@@ -1042,7 +1252,7 @@
   <div class="page-header">
     <div>
       <h2>健康提醒</h2>
-      <p>管理家庭成员的用药、体检、复诊和日常健康计划。</p>
+      <p>当前登录账号“本人”的提醒与用药完成记录已连接 Supabase；其他本地代管档案暂时继续保存在浏览器。</p>
     </div>
   </div>
 
@@ -1268,19 +1478,119 @@
   <div id="reminderToast" class="reminder-toast" aria-live="polite"></div>
 </section>
 
+
+<section class="page" id="page-identity">
+  <div class="personal-space-shell">
+    <div class="personal-space-topbar">
+      <button class="personal-back-btn" type="button" onclick="returnToWorkspace()">← 返回家庭健康管理</button>
+      <div class="personal-space-brand">
+        <span class="personal-mini-avatar" id="personalMiniAvatar">我</span>
+        <div><strong id="personalMiniName">我的健康主页</strong><small id="personalMiniId">用户 ID</small></div>
+      </div>
+    </div>
+    <div class="personal-space-content">
+      <div class="page-header identity-page-header">
+        <div><div class="identity-demo-badge">Supabase 账号已连接 · 健康业务数据正在分阶段迁移</div><h2>我的主页</h2><p>管理我的个人身份、公开资料和家庭健康共享权限。</p></div>
+      </div>
+      <div class="identity-tabs" id="identityTabs">
+        <button class="identity-tab active" data-identity-tab="me" onclick="switchIdentityTab('me')">我的资料</button>
+        <button class="identity-tab" data-identity-tab="public" onclick="switchIdentityTab('public')">公开名片</button>
+        <button class="identity-tab" data-identity-tab="permissions" onclick="switchIdentityTab('permissions')">健康共享</button>
+      </div>
+      <div class="identity-panel active" id="identity-panel-me">
+        <div class="identity-me-grid">
+          <div class="card identity-profile-card" id="identityProfileCard"></div>
+          <div class="card identity-health-card" id="identityHealthSummary"></div>
+        </div>
+      </div>
+      <div class="identity-panel" id="identity-panel-public">
+        <div class="public-editor-single">
+          <div class="card public-editor-card">
+            <div class="card-title">我的公开名片</div>
+            <div class="card-subtitle">设置别人通过用户 ID 找到你时可以看到的信息。陌生人永远无法从这里看到健康记录、饮食、疾病、过敏、用药或提醒。</div>
+            <div class="identity-form-grid">
+              <div class="form-group"><label class="form-label">昵称</label><input class="form-control" id="identityNickname" maxlength="30"></div>
+              <div class="form-group"><label class="form-label">地区（可选）</label><input class="form-control" id="identityRegion" maxlength="30" placeholder="例如：北京"></div>
+              <div class="form-group full"><label class="form-label">个人简介（可选）</label><textarea class="form-control" id="identityBio" maxlength="80" placeholder="例如：认真生活，认真吃饭 🌱"></textarea></div>
+            </div>
+            <div class="public-settings-heading">谁可以看到什么</div>
+            <div class="public-toggle-list switch-style">
+              <label><span><strong>公开地区</strong><small>陌生人可以看到你填写的地区</small></span><span class="toggle-wrap"><input type="checkbox" id="identityShowRegion"><i></i></span></label>
+              <label><span><strong>公开年龄段</strong><small>只显示年龄段，不显示生日</small></span><span class="toggle-wrap"><input type="checkbox" id="identityShowAgeBand"><i></i></span></label>
+              <label><span><strong>公开性别</strong><small>默认不公开</small></span><span class="toggle-wrap"><input type="checkbox" id="identityShowGender"><i></i></span></label>
+            </div>
+            <div class="privacy-hard-rule">🔒 无论以上如何设置，健康记录、饮食、疾病、过敏、用药和提醒都不会向陌生人公开。</div>
+            <div class="public-editor-actions">
+              <button class="primary-btn" onclick="saveIdentityPublicSettings()">保存公开名片</button>
+              <button class="secondary-btn" onclick="previewPublicCard()">预览公开名片</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="identity-panel" id="identity-panel-permissions">
+        <div class="card permissions-card">
+          <div class="card-title">我的健康共享</div>
+          <div class="card-subtitle">加入家庭不等于开放全部健康资料。开关会直接保存到 Supabase；健康和医疗类信息默认关闭，生活协作类可按需要开启。</div>
+          <div class="permission-groups" id="permissionGroups"></div>
+          <div class="privacy-rule-banner">🔒 家庭管理员可以管理家庭关系，但不会因此自动获得你的全部健康查看权限。陌生人始终无法查看私人健康数据。</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="modal-overlay" id="publicCardModal" onclick="if(event.target.id==='publicCardModal')closePublicCardModal()">
+  <div class="modal public-card-modal">
+    <div class="modal-header">
+      <div><h3>公开个人名片</h3><div class="card-subtitle">陌生人只能看到这一层资料。</div></div>
+      <button class="modal-close" onclick="closePublicCardModal()">×</button>
+    </div>
+    <div class="modal-body" id="publicCardModalBody"></div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="familyHealthViewModal" onclick="if(event.target.id==='familyHealthViewModal')closeFamilyHealthView()">
+  <div class="modal">
+    <div class="modal-header">
+      <div><h3 id="familyHealthViewTitle">家庭健康名片</h3><div class="card-subtitle">只显示当前家庭共享权限允许查看的内容。</div></div>
+      <button class="modal-close" onclick="closeFamilyHealthView()">×</button>
+    </div>
+    <div class="modal-body" id="familyHealthViewBody"></div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="syncConflictModal" onclick="if(event.target.id==='syncConflictModal')closeSyncConflict()">
+  <div class="modal">
+    <div class="modal-header">
+      <div><h3>发现资料冲突</h3><div class="card-subtitle">真实云同步接入后，同一条记录两边都修改时不会静默覆盖。</div></div>
+      <button class="modal-close" onclick="closeSyncConflict()">×</button>
+    </div>
+    <div class="modal-body" id="syncConflictBody"></div>
+  </div>
+</div>
+
 <section class="page" id="page-backup">
   <div class="page-header">
     <div>
-      <h2>家庭资料备份</h2>
-      <p>把家庭成员、健康记录、饮食、提醒和个人食材保存到你自己的设备。备份过程不会上传任何私人资料。</p>
+      <h2>资料与同步</h2>
+      <p>本地备份负责“防丢失”，家庭云同步负责“多设备共享”。当前云同步仍是前端演示，备份恢复功能可实际使用。</p>
+    </div>
+  </div>
+
+  <div class="data-mode-cards">
+    <div class="data-mode-card local">
+      <span>💾</span><div><strong>本机资料</strong><small>日常记录优先保存在当前设备，可随时备份和恢复。</small></div>
+    </div>
+    <div class="data-mode-card cloud">
+      <span>☁️</span><div><strong>家庭云同步</strong><small>未来由你主动点击同步，把允许共享的资料上传并获取家人新资料。</small></div>
     </div>
   </div>
 
   <div class="backup-privacy-banner">
     <div class="backup-privacy-icon">🛡️</div>
     <div>
-      <strong>备份只在你的浏览器和设备之间进行</strong>
-      <p>GitHub 只提供网页程序和公共食材资料；你的家庭健康备份文件由浏览器直接生成并保存到本机。</p>
+      <strong>本地备份不会上传私人资料</strong>
+      <p>GitHub 只提供网页程序和公共食材资料；备份文件由浏览器直接生成并保存到你的设备。</p>
     </div>
   </div>
 
@@ -1291,7 +1601,7 @@
       <div class="card-subtitle">建议在换手机、换电脑、清理浏览器数据或进行重要更新前备份一次。</div>
       <div class="backup-summary-grid" id="backupCurrentSummary"></div>
       <button class="primary-btn backup-primary-btn" type="button" onclick="downloadFamilyBackup(false)">下载备份文件</button>
-      <div class="backup-help">下载后会得到一个“家庭健康备份”文件，请像保存照片或重要文档一样妥善保存。文件可能包含家庭成员姓名和健康信息。</div>
+      <div class="backup-help">下载后会得到“家庭健康备份”文件。请像保存照片或重要文档一样妥善保管。</div>
     </div>
 
     <div class="card backup-main-card">
@@ -1300,10 +1610,25 @@
       <div class="card-subtitle">换设备时，选择之前保存的家庭健康备份文件即可恢复。</div>
       <input type="file" id="backupRestoreFile" accept=".yunihealth,.json,application/json" style="display:none" onchange="handleBackupFileSelected(event)">
       <button class="secondary-btn backup-select-btn" type="button" onclick="document.getElementById('backupRestoreFile').click()">选择备份文件</button>
-      <div id="backupRestorePreview" class="backup-restore-preview">
-        <div class="backup-empty-preview">尚未选择备份文件</div>
-      </div>
+      <div id="backupRestorePreview" class="backup-restore-preview"><div class="backup-empty-preview">尚未选择备份文件</div></div>
     </div>
+  </div>
+
+  <div class="card sync-card backup-sync-card">
+    <div class="sync-head">
+      <div>
+        <div class="card-title">家庭资料同步</div>
+        <div class="card-subtitle">本地优先、手动同步。当前仅展示同步中心和冲突处理逻辑，尚未连接真实后端。</div>
+      </div>
+      <span class="sync-demo-label">待接入云服务</span>
+    </div>
+    <div class="sync-stats" id="syncStats"></div>
+    <div class="sync-actions-row">
+      <button class="primary-btn" onclick="simulateManualSync()">模拟一次手动同步</button>
+      <button class="secondary-btn" onclick="showDemoConflict()">预览冲突处理</button>
+    </div>
+    <div id="syncResultBox" class="sync-result-box"></div>
+    <div class="reference-note">未来实际接入后：普通健康记录仍由你点击“立即同步”才上传/下载；但账号身份、家庭关系、退出家庭和权限撤销属于安全状态，App 启动时应自动检查。</div>
   </div>
 
   <div class="card backup-details-card">
@@ -1316,7 +1641,7 @@
       <div><span>🥕</span><strong>个人食材库</strong><small>自己添加、修改及已下载到本机的食材</small></div>
       <div><span>🔥</span><strong>坚持记录配置</strong><small>连续记录和本地设置</small></div>
     </div>
-    <div class="reference-note">恢复会替换这个浏览器中当前的家庭健康资料。恢复前默认会先下载一份“恢复前安全备份”，避免误操作。不会调用 <code>localStorage.clear()</code>，也不会删除与本网页无关的网站数据。</div>
+    <div class="reference-note">恢复会替换当前浏览器中的家庭健康资料。恢复前默认先下载一份“恢复前安全备份”，避免误操作。</div>
   </div>
 </section>
 
@@ -1874,8 +2199,370 @@
 </div>
 
 <script>
-const APP_VERSION="2026.08.26-backup-1";
-const STORAGE_KEYS={FAMILY_MEMBERS:"family_member_list",HEALTH_RECORDS:"health_index_record",DIET_RECORDS:"diet_nutrition_record",CUSTOM_DISHES:"custom_dish_library",REMINDERS:"health_remind_list",REMINDER_LOGS:"health_reminder_logs",MEDICATION_LOGS:"medication_execution_logs",STREAK_PROTECTION:"health_streak_protection",ONLINE_FOOD_PACKS:"online_food_pack_state",GLOBAL_CONFIG:"health_global_config"};
+const APP_VERSION="2026.09.02-supabase-reminders-1";
+
+/* =========================
+   Supabase 第一阶段
+   - Auth 登录/注册/Session
+   - 读取 public.user_profile
+   - 现有健康/饮食/提醒业务逻辑暂时保持 localStorage
+   ========================= */
+const SUPABASE_URL="https://kcakzzrwdsjtpmtqgvvn.supabase.co";
+const SUPABASE_PUBLISHABLE_KEY="sb_publishable_UaJZAZqNLU408Bc7iKm6Hg_5Fq5DUiJ";
+const SUPABASE_EMAIL_REDIRECT="https://yunizzzz.github.io/familyhealth/";
+const yuniSupabase=window.supabase.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY,{
+  auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}
+});
+
+let currentSupabaseUser=null;
+let currentSupabaseProfile=null;
+let appCoreInitialized=false;
+
+function showAuthLoading(show,text="正在连接 Supabase…"){
+  const el=document.getElementById("authLoading"),t=document.getElementById("authLoadingText");
+  if(t)t.textContent=text;
+  if(el)el.classList.toggle("show",Boolean(show));
+}
+function showAuthGate(show){
+  document.body.classList.toggle("auth-locked",Boolean(show));
+  document.getElementById("authGate")?.classList.toggle("show",Boolean(show));
+}
+function showAuthStatus(message,type="ok"){
+  const el=document.getElementById("authStatus");if(!el)return;
+  el.className=`auth-status ${type}`;el.textContent=message||"";
+}
+function clearAuthStatus(){
+  const el=document.getElementById("authStatus");if(!el)return;
+  el.className="auth-status";el.textContent="";
+}
+function switchAuthMode(mode){
+  const login=mode!=="signup";
+  document.getElementById("authLoginTab")?.classList.toggle("active",login);
+  document.getElementById("authSignupTab")?.classList.toggle("active",!login);
+  document.getElementById("authLoginPanel")?.classList.toggle("active",login);
+  document.getElementById("authSignupPanel")?.classList.toggle("active",!login);
+  clearAuthStatus();
+}
+function authErrorText(err){
+  const msg=String(err?.message||err||"未知错误");
+  if(/Invalid login credentials/i.test(msg))return "邮箱或密码不正确。";
+  if(/Email not confirmed/i.test(msg))return "这个邮箱还没有完成确认，请先打开确认邮件。";
+  if(/User already registered/i.test(msg))return "这个邮箱已经注册过，请直接登录。";
+  if(/Password should be at least/i.test(msg))return "密码长度不足，请至少使用 8 位。";
+  return msg;
+}
+async function handleSupabaseLogin(event){
+  event.preventDefault();clearAuthStatus();
+  const email=document.getElementById("authLoginEmail")?.value.trim();
+  const password=document.getElementById("authLoginPassword")?.value||"";
+  const btn=document.getElementById("authLoginBtn");
+  if(btn){btn.disabled=true;btn.textContent="正在登录…";}
+  try{
+    const {data,error}=await yuniSupabase.auth.signInWithPassword({email,password});
+    if(error)throw error;
+    if(!data?.user)throw new Error("登录成功但没有取得用户资料，请刷新后重试。");
+    showAuthStatus("登录成功，正在读取个人资料…","ok");
+    await activateSupabaseUser(data.user);
+  }catch(err){
+    console.error("Supabase login failed:",err);
+    showAuthStatus(`登录失败：${authErrorText(err)}`,"error");
+  }finally{
+    if(btn){btn.disabled=false;btn.textContent="登录";}
+  }
+}
+async function handleSupabaseSignup(event){
+  event.preventDefault();clearAuthStatus();
+  const email=document.getElementById("authSignupEmail")?.value.trim();
+  const nickname=document.getElementById("authSignupNickname")?.value.trim();
+  const password=document.getElementById("authSignupPassword")?.value||"";
+  if(!nickname){showAuthStatus("请填写昵称。","error");return}
+  const btn=document.getElementById("authSignupBtn");
+  if(btn){btn.disabled=true;btn.textContent="正在创建…";}
+  try{
+    const {data,error}=await yuniSupabase.auth.signUp({
+      email,password,
+      options:{emailRedirectTo:SUPABASE_EMAIL_REDIRECT,data:{nickname}}
+    });
+    if(error)throw error;
+    if(data?.session&&data?.user){
+      showAuthStatus("账号已创建并登录，正在读取个人资料…","ok");
+      await activateSupabaseUser(data.user);
+    }else{
+      showAuthStatus(`注册请求已提交。\n\n请打开 ${email} 的收件箱，点击 Supabase 确认邮件。确认后回到网站登录。`,"ok");
+      switchAuthMode("login");
+      const loginEmail=document.getElementById("authLoginEmail");if(loginEmail)loginEmail.value=email;
+    }
+  }catch(err){
+    console.error("Supabase signup failed:",err);
+    showAuthStatus(`注册失败：${authErrorText(err)}`,"error");
+  }finally{
+    if(btn){btn.disabled=false;btn.textContent="创建账号";}
+  }
+}
+async function fetchCurrentUserProfile(userId){
+  const {data,error}=await yuniSupabase
+    .from("user_profile")
+    .select("user_id,health_id,nickname,avatar_path,bio,region,gender,birth_date,height_cm,show_region,show_age_band,show_gender,created_at,updated_at")
+    .eq("user_id",userId)
+    .maybeSingle();
+  if(error)throw error;
+  return data||null;
+}
+
+async function syncSignupNicknameIfNeeded(user,profile){
+  const signupNickname=String(user?.user_metadata?.nickname||"").trim();
+  if(!signupNickname||!profile)return profile;
+  const currentNickname=String(profile.nickname||"").trim();
+  if(currentNickname && currentNickname!=="新用户")return profile;
+
+  const {data,error}=await yuniSupabase
+    .from("user_profile")
+    .update({nickname:signupNickname,updated_at:new Date().toISOString()})
+    .eq("user_id",user.id)
+    .select("user_id,health_id,nickname,avatar_path,bio,region,gender,birth_date,height_cm,show_region,show_age_band,show_gender,created_at,updated_at")
+    .maybeSingle();
+
+  if(error){
+    console.warn("注册昵称同步失败：",error);
+    return profile;
+  }
+  return data||profile;
+}
+
+const HEALTH_DB_TYPE={
+  height:1,
+  weight:2,
+  bmi:3,
+  blood_pressure:4,
+  blood_sugar:5,
+  heart_rate:6
+};
+const HEALTH_DB_TYPE_REVERSE={
+  1:"height",
+  2:"weight",
+  3:"bmi",
+  4:"blood_pressure",
+  5:"blood_sugar",
+  6:"heart_rate"
+};
+
+function currentAccountMemberId(){
+  return currentSupabaseUser ? `account_${currentSupabaseUser.id}` : "";
+}
+function profileGenderText(v){
+  if(v===1||v==="1")return "男";
+  if(v===2||v==="2")return "女";
+  if(v===3||v==="3")return "其他";
+  return typeof v==="string" ? v : "";
+}
+function ensureCurrentAccountMember(){
+  if(!currentSupabaseUser)return "";
+  const memberId=currentAccountMemberId();
+  const identity=AuthService.current();
+  const members=loadData(STORAGE_KEYS.FAMILY_MEMBERS,[]);
+  const idx=members.findIndex(m=>m.member_id===memberId);
+  const existing=idx>=0?members[idx]:{};
+  const row={
+    ...existing,
+    member_id:memberId,
+    name:currentSupabaseProfile?.nickname||identity.nickname||"本人",
+    relation:"本人",
+    birth_date:currentSupabaseProfile?.birth_date||existing.birth_date||"",
+    gender:profileGenderText(currentSupabaseProfile?.gender)||existing.gender||"",
+    blood_type:existing.blood_type||"",
+    allergy_history:existing.allergy_history||"",
+    drug_allergy_history:existing.drug_allergy_history||"",
+    chronic_disease:existing.chronic_disease||"",
+    common_medicine:existing.common_medicine||"",
+    account_user_id:currentSupabaseUser.id,
+    is_cloud_account:true,
+    create_date:existing.create_date||formatDate(),
+    update_date:formatDate()
+  };
+  if(idx>=0)members[idx]=row;else members.unshift(row);
+  saveData(STORAGE_KEYS.FAMILY_MEMBERS,members);
+  const cfg=loadData(STORAGE_KEYS.GLOBAL_CONFIG,{});
+  cfg.default_member_id=memberId;
+  cfg.update_date=formatDate();
+  saveData(STORAGE_KEYS.GLOBAL_CONFIG,cfg);
+  return memberId;
+}
+function dbMeasurementToLocal(row){
+  const recordType=HEALTH_DB_TYPE_REVERSE[Number(row.type)];
+  if(!recordType||recordType==="bmi")return null;
+  return {
+    record_id:row.id,
+    member_id:currentAccountMemberId(),
+    record_type:recordType,
+    height_value:row.height_cm??null,
+    weight_value:row.weight_kg??null,
+    systolic:row.systolic??null,
+    diastolic:row.diastolic??null,
+    blood_sugar_value:row.blood_glucose??null,
+    sugar_period:row.glucose_period===1?"fasting":row.glucose_period===2?"after_1h":row.glucose_period===3?"after_2h":row.glucose_period===4?"random":null,
+    heart_rate_value:row.heart_rate??null,
+    record_date:row.record_date||"",
+    record_time:row.record_time ? String(row.record_time).slice(0,5) : "",
+    remark:row.note||"",
+    cloud:true
+  };
+}
+function glucosePeriodToDb(v){
+  return {fasting:1,after_1h:2,after_2h:3,random:4}[v]||null;
+}
+async function syncHealthMeasurementsFromSupabase(){
+  if(!currentSupabaseUser)return;
+  ensureCurrentAccountMember();
+  const {data,error}=await yuniSupabase
+    .from("health_measurements")
+    .select("id,user_id,type,record_date,record_time,height_cm,weight_kg,bmi,systolic,diastolic,blood_glucose,heart_rate,note,deleted_at,glucose_period")
+    .eq("user_id",currentSupabaseUser.id)
+    .is("deleted_at",null)
+    .order("record_date",{ascending:false});
+  if(error)throw error;
+
+  const memberId=currentAccountMemberId();
+  const current=loadData(STORAGE_KEYS.HEALTH_RECORDS,[]);
+  const otherRecords=current.filter(r=>r.member_id!==memberId);
+  const cloudRows=(data||[]).map(dbMeasurementToLocal).filter(Boolean);
+  saveData(STORAGE_KEYS.HEALTH_RECORDS,[...otherRecords,...cloudRows]);
+}
+function localHealthRecordToDb(r){
+  const payload={
+    user_id:currentSupabaseUser.id,
+    type:HEALTH_DB_TYPE[r.record_type],
+    record_date:r.record_date,
+    record_time:r.record_time||null,
+    note:r.remark||null,
+    height_cm:null,
+    weight_kg:null,
+    systolic:null,
+    diastolic:null,
+    blood_glucose:null,
+    heart_rate:null,
+    glucose_period:null
+  };
+  if(r.record_type==="height")payload.height_cm=r.height_value;
+  if(r.record_type==="weight")payload.weight_kg=r.weight_value;
+  if(r.record_type==="blood_pressure"){payload.systolic=r.systolic;payload.diastolic=r.diastolic}
+  if(r.record_type==="blood_sugar"){payload.blood_glucose=r.blood_sugar_value;payload.glucose_period=glucosePeriodToDb(r.sugar_period)}
+  if(r.record_type==="heart_rate")payload.heart_rate=r.heart_rate_value;
+  return payload;
+}
+
+function profileToLocalIdentity(user,profile){
+  const old=loadData(STORAGE_KEYS.IDENTITY,{});
+  const nickname=profile?.nickname||user?.user_metadata?.nickname||old.nickname||"新用户";
+  return {
+    ...old,
+    user_id:user?.id||old.user_id||"",
+    yuni_id:profile?.health_id||old.yuni_id||"",
+    health_id:profile?.health_id||"",
+    email:user?.email||"",
+    nickname,
+    bio:profile?.bio??old.bio??"",
+    region:profile?.region??old.region??"",
+    gender:profile?.gender??old.gender??"",
+    birth_date:profile?.birth_date??old.birth_date??"",
+    avatar_path:profile?.avatar_path??old.avatar_path??"",
+    avatar_text:(nickname||"我").slice(0,1),
+    public_settings:{
+      show_region:Boolean(profile?.show_region),
+      show_age_band:Boolean(profile?.show_age_band),
+      show_gender:Boolean(profile?.show_gender)
+    },
+    supabase_connected:true
+  };
+}
+async function activateSupabaseUser(user){
+  showAuthLoading(true,"正在读取个人资料…");
+  try{
+    currentSupabaseUser=user;
+    currentSupabaseProfile=await fetchCurrentUserProfile(user.id);
+    currentSupabaseProfile=await syncSignupNicknameIfNeeded(user,currentSupabaseProfile);
+    AuthService.save(profileToLocalIdentity(user,currentSupabaseProfile));
+    ensureCurrentAccountMember();
+    try{
+      await syncHealthMeasurementsFromSupabase();
+    }catch(healthErr){
+      console.warn("健康记录云同步暂不可用：",healthErr);
+    }
+    try{
+      await syncFamilyCloud();
+      try{
+        await syncSharePermissionsCloud();
+      }catch(permissionErr){
+        console.warn("共享权限云同步暂不可用：",permissionErr);
+      }
+      try{
+        await syncReminderCloud();
+      }catch(reminderErr){
+        console.warn("提醒云同步暂不可用：",reminderErr);
+      }
+    }catch(familyErr){
+      console.warn("家庭关系云同步暂不可用：",familyErr);
+    }
+    if(!appCoreInitialized)initAppCore();
+    else renderAll();
+    renderIdentityTopbar();
+    document.getElementById("topbarLogoutBtn")?.style.setProperty("display","");
+    showAuthGate(false);
+  }catch(err){
+    console.error("Profile load failed:",err);
+    currentSupabaseProfile=null;
+    const fallback=profileToLocalIdentity(user,null);
+    AuthService.save(fallback);
+    if(!appCoreInitialized)initAppCore();
+    else renderAll();
+    renderIdentityTopbar();
+    document.getElementById("topbarLogoutBtn")?.style.setProperty("display","");
+    showAuthGate(false);
+    alert("账号已登录，但读取 user_profile 时遇到问题：\n"+authErrorText(err)+"\n\n网站会先以账号基本资料进入。");
+  }finally{
+    showAuthLoading(false);
+  }
+}
+async function supabaseSignOut(){
+  if(!confirm("确定退出当前账号吗？"))return;
+  showAuthLoading(true,"正在退出…");
+  try{
+    const {error}=await yuniSupabase.auth.signOut();
+    if(error)throw error;
+    currentSupabaseUser=null;currentSupabaseProfile=null;
+    document.getElementById("topbarLogoutBtn")?.style.setProperty("display","none");
+    showAuthGate(true);switchAuthMode("login");
+    showAuthStatus("已经安全退出。","ok");
+  }catch(err){
+    alert("退出失败："+authErrorText(err));
+  }finally{showAuthLoading(false)}
+}
+async function initializeSupabaseAuth(){
+  showAuthLoading(true,"正在检查登录状态…");
+  try{
+    const {data,error}=await yuniSupabase.auth.getSession();
+    if(error)throw error;
+    const user=data?.session?.user||null;
+    if(user)await activateSupabaseUser(user);
+    else{
+      showAuthGate(true);
+      document.getElementById("topbarLogoutBtn")?.style.setProperty("display","none");
+    }
+    yuniSupabase.auth.onAuthStateChange((event,session)=>{
+      if(event==="SIGNED_OUT"){
+        currentSupabaseUser=null;currentSupabaseProfile=null;
+        document.getElementById("topbarLogoutBtn")?.style.setProperty("display","none");
+        showAuthGate(true);
+      }
+    });
+  }catch(err){
+    console.error("Supabase init failed:",err);
+    showAuthGate(true);
+    showAuthStatus("无法连接 Supabase："+authErrorText(err)+"\n\n请确认网络连接后刷新页面。","error");
+  }finally{showAuthLoading(false)}
+}
+
+
+const STORAGE_KEYS={FAMILY_MEMBERS:"family_member_list",HEALTH_RECORDS:"health_index_record",DIET_RECORDS:"diet_nutrition_record",CUSTOM_DISHES:"custom_dish_library",REMINDERS:"health_remind_list",REMINDER_LOGS:"health_reminder_logs",MEDICATION_LOGS:"medication_execution_logs",STREAK_PROTECTION:"health_streak_protection",ONLINE_FOOD_PACKS:"online_food_pack_state",IDENTITY:"yuni_identity_demo",FAMILY_RELATIONS:"yuni_family_relations_demo",FAMILY_INVITES:"yuni_family_invites_demo",SHARE_PERMISSIONS:"yuni_share_permissions_demo",SYNC_META:"yuni_sync_meta_demo",GLOBAL_CONFIG:"health_global_config"};
 function loadData(key,def=[]){try{const v=localStorage.getItem(key);return v===null?def:JSON.parse(v)}catch(e){return def}}
 function saveData(key,data){localStorage.setItem(key,JSON.stringify(data))}
 function formatDate(d=new Date()){return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`}
@@ -1904,6 +2591,22 @@ function initSampleData(){
   if(localStorage.getItem(STORAGE_KEYS.STREAK_PROTECTION)===null)saveData(STORAGE_KEYS.STREAK_PROTECTION,{family:[],members:{}});
   if(localStorage.getItem(STORAGE_KEYS.ONLINE_FOOD_PACKS)===null)saveData(STORAGE_KEYS.ONLINE_FOOD_PACKS,{installed:{},last_checked:""});
   if(localStorage.getItem(STORAGE_KEYS.GLOBAL_CONFIG)===null)saveData(STORAGE_KEYS.GLOBAL_CONFIG,{default_member_id:"m001",update_date:formatDate()});
+  if(localStorage.getItem(STORAGE_KEYS.IDENTITY)===null)saveData(STORAGE_KEYS.IDENTITY,{
+    user_id:"u_local_me",yuni_id:"70022931",nickname:"我的健康主页",bio:"认真生活，认真记录 🌱",region:"",
+    gender:"",birth_date:"",avatar_text:"我",bound_profile_id:"",
+    public_settings:{show_region:false,show_age_band:false,show_gender:false}
+  });
+  if(localStorage.getItem(STORAGE_KEYS.FAMILY_RELATIONS)===null)saveData(STORAGE_KEYS.FAMILY_RELATIONS,{
+    family_id:"fam_local_001",family_name:"我的家",owner_user_id:"u_local_me",
+    relations:[{user_id:"u_local_me",role:"admin",status:"active",joined_at:new Date().toISOString()}]
+  });
+  if(localStorage.getItem(STORAGE_KEYS.FAMILY_INVITES)===null)saveData(STORAGE_KEYS.FAMILY_INVITES,{received:[],sent:[]});
+  if(localStorage.getItem(STORAGE_KEYS.SHARE_PERMISSIONS)===null)saveData(STORAGE_KEYS.SHARE_PERMISSIONS,{
+    height_weight:false,bmi:false,blood_pressure:false,blood_sugar:false,heart_rate:false,
+    diet:true,reminders:true,medication_reminders:false,health_alerts:false
+  });
+  if(localStorage.getItem(STORAGE_KEYS.SYNC_META)===null)saveData(STORAGE_KEYS.SYNC_META,{last_sync:"",pending_local:0,last_result:null});
+
 }
 
 function calculateAge(birthDate){
@@ -3205,6 +3908,782 @@ function startHomeBroadcast(){
 function stopHomeBroadcast(){if(homeBroadcastTimer){clearInterval(homeBroadcastTimer);homeBroadcastTimer=null}}
 function pauseHomeBroadcast(){homeBroadcastPaused=true;stopHomeBroadcast()}
 function resumeHomeBroadcast(){homeBroadcastPaused=false;startHomeBroadcast()}
+
+const DEMO_PUBLIC_DIRECTORY_UNUSED=[
+  {user_id:"u_demo_lin",yuni_id:"90081234",nickname:"林晓",avatar_text:"林",bio:"把健康记录变成日常习惯。",region:"上海"},
+  {user_id:"u_demo_zhou",yuni_id:"40072356",nickname:"周宁",avatar_text:"周",bio:"认真吃饭，规律运动。",region:"杭州"}
+];
+const SHARE_PERMISSION_LABELS={
+  height_weight:["身高体重","身高、体重等基础体格数据","健康"],
+  bmi:["BMI","根据身高体重计算的体重状态","健康"],
+  blood_pressure:["血压","收缩压与舒张压记录","健康"],
+  blood_sugar:["血糖","空腹/餐后血糖记录","健康"],
+  heart_rate:["心率","静息或测量时心率","健康"],
+  diet:["饮食记录","每日饮食和营养摄入","生活"],
+  reminders:["普通提醒","体检、复诊和日常健康提醒","生活"],
+  medication_reminders:["用药提醒","是否允许家庭成员查看你的用药提醒","敏感"],
+  health_alerts:["健康警报","健康异常提醒和警报信息","敏感"]
+};
+let currentIdentityTab="me";
+let previousWorkspacePage="home";
+let previousWorkspaceTitle="首页";
+
+const AuthService={
+  current(){return loadData(STORAGE_KEYS.IDENTITY,{})},
+  save(profile){saveData(STORAGE_KEYS.IDENTITY,profile);return profile}
+};
+const FamilyService={
+  state(){return loadData(STORAGE_KEYS.FAMILY_RELATIONS,{family_id:"fam_local_001",family_name:"我的家",owner_user_id:"u_local_me",relations:[]})},
+  invites(){return loadData(STORAGE_KEYS.FAMILY_INVITES,{received:[],sent:[]})},
+  saveInvites(v){saveData(STORAGE_KEYS.FAMILY_INVITES,v)},
+  saveState(v){saveData(STORAGE_KEYS.FAMILY_RELATIONS,v)}
+};
+
+let cloudSharePermission=null;
+let cloudSharePermissionLoading=false;
+
+const SHARE_PERMISSION_COLUMNS=[
+  "height_weight","bmi","blood_pressure","blood_sugar","heart_rate",
+  "diet","reminders","medication_reminders","health_alerts"
+];
+
+function normalizeSharePermission(row){
+  const defaults={
+    height_weight:false,bmi:false,blood_pressure:false,blood_sugar:false,heart_rate:false,
+    diet:true,reminders:true,medication_reminders:false,health_alerts:false
+  };
+  SHARE_PERMISSION_COLUMNS.forEach(k=>{
+    if(row && typeof row[k]==="boolean")defaults[k]=row[k];
+  });
+  return defaults;
+}
+
+async function syncSharePermissionsCloud(){
+  if(!currentSupabaseUser)return null;
+  const familyId=cloudFamilyId();
+  if(!familyId){
+    cloudSharePermission=null;
+    return null;
+  }
+
+  cloudSharePermissionLoading=true;
+  try{
+    let {data,error}=await yuniSupabase
+      .from("share_permissions")
+      .select("id,user_id,family_id,height_weight,bmi,blood_pressure,blood_sugar,heart_rate,diet,reminders,medication_reminders,health_alerts,created_at,updated_at")
+      .eq("user_id",currentSupabaseUser.id)
+      .eq("family_id",familyId)
+      .maybeSingle();
+
+    if(error)throw error;
+
+    // 老测试账号可能没有权限记录；正式邀请流程会自动生成。
+    // 为了让老账号也能继续测试，缺失时按数据库默认值创建一条。
+    if(!data){
+      const insertResult=await yuniSupabase
+        .from("share_permissions")
+        .insert({user_id:currentSupabaseUser.id,family_id:familyId})
+        .select("id,user_id,family_id,height_weight,bmi,blood_pressure,blood_sugar,heart_rate,diet,reminders,medication_reminders,health_alerts,created_at,updated_at")
+        .single();
+      if(insertResult.error)throw insertResult.error;
+      data=insertResult.data;
+    }
+
+    cloudSharePermission=data;
+    PermissionService.save(normalizeSharePermission(data));
+    return data;
+  }finally{
+    cloudSharePermissionLoading=false;
+  }
+}
+
+async function saveSharePermissionCloud(key,value){
+  if(!SHARE_PERMISSION_COLUMNS.includes(key))throw new Error("不支持的共享权限项目");
+  if(!currentSupabaseUser)throw new Error("请先登录");
+  const familyId=cloudFamilyId();
+  if(!familyId)throw new Error("你当前还没有加入家庭");
+
+  if(!cloudSharePermission){
+    await syncSharePermissionsCloud();
+  }
+
+  const payload={};
+  payload[key]=Boolean(value);
+  payload.updated_at=new Date().toISOString();
+
+  const {data,error}=await yuniSupabase
+    .from("share_permissions")
+    .update(payload)
+    .eq("user_id",currentSupabaseUser.id)
+    .eq("family_id",familyId)
+    .select("id,user_id,family_id,height_weight,bmi,blood_pressure,blood_sugar,heart_rate,diet,reminders,medication_reminders,health_alerts,created_at,updated_at")
+    .single();
+
+  if(error)throw error;
+  cloudSharePermission=data;
+  PermissionService.save(normalizeSharePermission(data));
+  return data;
+}
+
+const PermissionService={
+  get(){return loadData(STORAGE_KEYS.SHARE_PERMISSIONS,{})},
+  save(v){saveData(STORAGE_KEYS.SHARE_PERMISSIONS,v)},
+  canViewProfile(viewer,target){return viewer?.user_id===target?.user_id||viewer?.relation==="family"},
+  canViewHealthType(viewer,target,dataType){
+    if(viewer?.user_id&&viewer.user_id===target?.user_id)return true;
+    if(viewer?.relation!=="family")return false;
+    return Boolean(this.get()[dataType]);
+  },
+  canEditProfile(viewer,target){return Boolean(viewer?.user_id&&viewer.user_id===target?.user_id)},
+  canManageFamily(viewer,family){return Boolean(viewer?.user_id&&family?.owner_user_id===viewer.user_id)},
+  canInviteMember(viewer,family){return this.canManageFamily(viewer,family)}
+};
+const SyncService={
+  state(){return loadData(STORAGE_KEYS.SYNC_META,{last_sync:"",pending_local:0,last_result:null})},
+  save(v){saveData(STORAGE_KEYS.SYNC_META,v)},
+  async sync(){
+    // Deliberately demo-only until a backend is connected.
+    const s=this.state(),result={uploaded:0,downloaded:0,merged:0,conflicts:0,demo:true,at:new Date().toISOString()};
+    s.last_sync=result.at;s.last_result=result;s.pending_local=0;this.save(s);return result;
+  }
+};
+
+function identityAgeBand(identity){
+  if(!identity?.birth_date)return "";
+  const age=calculateAge(identity.birth_date);
+  if(!Number.isFinite(age)||age<0)return "";
+  const start=Math.floor(age/10)*10;
+  return `${start}–${start+9}岁`;
+}
+function copyYuniId(){
+  const id=AuthService.current().yuni_id||"";
+  if(navigator.clipboard?.writeText)navigator.clipboard.writeText(id).then(()=>alert("用户 ID 已复制"));
+  else prompt("复制你的 用户 ID：",id);
+}
+function identityBoundMember(){
+  const identity=AuthService.current();
+  const members=loadData(STORAGE_KEYS.FAMILY_MEMBERS,[]);
+  return members.find(m=>m.member_id===identity.bound_profile_id)||null;
+}
+function latestHealthValue(memberId,type){
+  const rows=loadData(STORAGE_KEYS.HEALTH_RECORDS,[]).filter(r=>r.member_id===memberId&&r.record_type===type)
+    .sort((a,b)=>`${b.record_date||""} ${b.record_time||""}`.localeCompare(`${a.record_date||""} ${a.record_time||""}`));
+  return rows[0]||null;
+}
+function identityMetricText(memberId,type){
+  const r=latestHealthValue(memberId,type);if(!r)return "暂无";
+  if(type==="weight")return `${r.weight_value??"-"} kg`;
+  if(type==="height")return `${r.height_value??"-"} cm`;
+  if(type==="blood_pressure")return `${r.systolic??"-"}/${r.diastolic??"-"} mmHg`;
+  if(type==="blood_sugar")return `${r.blood_sugar_value??"-"} mmol/L`;
+  if(type==="heart_rate")return `${r.heart_rate_value??"-"} 次/分`;
+  return "暂无";
+}
+function renderIdentityTopbar(){
+  const i=AuthService.current();
+  const avatar=document.getElementById("topbarUserAvatar"),name=document.getElementById("topbarUserName"),id=document.getElementById("topbarUserId");
+  if(avatar)avatar.textContent=(i.avatar_text||i.nickname||"我").slice(0,1);
+  if(name)name.textContent=i.nickname||"我的主页";
+  if(id)id.textContent=i.health_id?`ID ${i.health_id}`:(i.email||"Supabase 账号");
+}
+function showPageById(page,title){
+  document.querySelectorAll(".nav-item").forEach(x=>x.classList.toggle("active",x.dataset.page===page));
+  document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));
+  const el=document.getElementById(`page-${page}`);if(el)el.classList.add("active");
+  if(window.pageTitle)pageTitle.textContent=title||page;
+}
+function openIdentityPage(tab="me"){
+  const active=document.querySelector(".page.active");
+  if(active&&active.id!=="page-identity"){
+    previousWorkspacePage=active.id.replace("page-","");
+    const nav=document.querySelector(`.nav-item[data-page="${previousWorkspacePage}"]`);
+    previousWorkspaceTitle=nav?.dataset.title||document.getElementById("pageTitle")?.textContent||"首页";
+  }
+  document.body.classList.add("personal-space-mode");
+  document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));
+  document.getElementById("page-identity")?.classList.add("active");
+  renderIdentityPage();switchIdentityTab(tab);window.scrollTo(0,0);
+}
+function returnToWorkspace(){
+  document.body.classList.remove("personal-space-mode");
+  document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));
+  const target=document.getElementById(`page-${previousWorkspacePage}`)||document.getElementById("page-home");target?.classList.add("active");
+  document.querySelectorAll(".nav-item").forEach(x=>x.classList.toggle("active",x.dataset.page===previousWorkspacePage));
+  if(document.getElementById("pageTitle"))pageTitle.textContent=previousWorkspaceTitle||"首页";
+  if(previousWorkspacePage==="home")renderHome();
+  if(previousWorkspacePage==="members"){renderMembers();renderIdentityFamily();}
+  if(previousWorkspacePage==="health")renderHealthPage();
+  if(previousWorkspacePage==="diet")requestAnimationFrame(renderDietPage);
+  if(previousWorkspacePage==="analysis")requestAnimationFrame(renderAnalysisPage);
+  if(previousWorkspacePage==="reminder")requestAnimationFrame(renderReminderPage);
+  if(previousWorkspacePage==="backup")requestAnimationFrame(renderBackupPage);
+  window.scrollTo(0,0);
+}
+function switchIdentityTab(tab){
+  currentIdentityTab=tab;
+  document.querySelectorAll(".identity-tab").forEach(b=>b.classList.toggle("active",b.dataset.identityTab===tab));
+  document.querySelectorAll(".identity-panel").forEach(p=>p.classList.remove("active"));
+  document.getElementById(`identity-panel-${tab}`)?.classList.add("active");
+  if(tab==="public")renderIdentityPublicSettings();
+  if(tab==="permissions")renderPermissionGroups();
+}
+function renderIdentityPage(){
+  renderIdentityTopbar();
+  const identity=AuthService.current(),member=identityBoundMember();
+  const card=document.getElementById("identityProfileCard");
+  if(card){
+    card.innerHTML=`<div class="identity-profile-hero">
+      <div class="identity-big-avatar">${escapeHtml((identity.avatar_text||identity.nickname||"我").slice(0,1))}</div>
+      <div><div class="identity-name">${escapeHtml(identity.nickname||"我的健康主页")}</div>
+      <div class="yuni-id-row"><span>用户 ID：${escapeHtml(identity.yuni_id||"-")}</span><button class="copy-id-btn" onclick="copyYuniId()">复制</button></div>
+      <div class="account-bind-badge ${member?"":"unbound"}">${member?"✓ 已绑定健康档案":"尚未绑定现有健康档案"}</div></div>
+    </div>
+    <div class="identity-bio">${escapeHtml(identity.bio||"还没有填写个人简介。")}</div>
+    `;
+  }
+  const summary=document.getElementById("identityHealthSummary");
+  if(summary){
+    if(!member){
+      summary.innerHTML=`<div class="card-title">我的健康概览</div><div class="card-subtitle">绑定一个现有健康档案后，这里会显示你的健康摘要。</div>
+      <div class="empty-state" style="padding:24px 0"><div class="empty-title">尚未绑定健康档案</div><button class="primary-btn" style="margin-top:12px" onclick="bindIdentityProfile()">选择档案</button></div>`;
+    }else{
+      const s=getMemberStreakStats(member.member_id);
+      summary.innerHTML=`<div class="card-title">我的健康概览</div><div class="card-subtitle">${escapeHtml(member.name)} · 🔥 连续记录 ${s.current_streak} 天</div>
+      <div class="identity-health-overview">
+        <div class="identity-health-stat"><span>体重</span><strong>${identityMetricText(member.member_id,"weight")}</strong></div>
+        <div class="identity-health-stat"><span>血压</span><strong>${identityMetricText(member.member_id,"blood_pressure")}</strong></div>
+        <div class="identity-health-stat"><span>心率</span><strong>${identityMetricText(member.member_id,"heart_rate")}</strong></div>
+        <div class="identity-health-stat"><span>今日状态</span><strong>${s.active_today?"✓ 已记录":"○ 待记录"}</strong></div>
+      </div>`;
+    }
+  }
+  renderIdentityPublicSettings();
+  renderPermissionGroups();
+  const i=AuthService.current();
+  const a=document.getElementById("personalMiniAvatar"),n=document.getElementById("personalMiniName"),id=document.getElementById("personalMiniId");
+  if(a)a.textContent=(i.avatar_text||i.nickname||"我").slice(0,1);
+  if(n)n.textContent=i.nickname||"我的健康主页";
+  if(id)id.textContent=`用户 ID：${i.yuni_id||"-"}`;
+}
+function bindIdentityProfile(){
+  const members=loadData(STORAGE_KEYS.FAMILY_MEMBERS,[]);
+  if(!members.length){alert("当前还没有健康档案，请先在“家庭成员”中新增成员。");return}
+  const identity=AuthService.current();
+  const options=members.map((m,i)=>`${i+1}. ${m.name}（${m.relation||"未填写关系"}）`).join("\n");
+  const chosen=prompt(`请输入要绑定的序号：\n\n${options}\n\n当前“绑定健康档案”仍是本地过渡功能；账号认证已经由 Supabase 提供。`,members.findIndex(m=>m.member_id===identity.bound_profile_id)+1||1);
+  if(chosen===null)return;
+  const idx=Number(chosen)-1;if(!Number.isInteger(idx)||!members[idx]){alert("序号无效");return}
+  identity.bound_profile_id=members[idx].member_id;
+  if(!identity.birth_date)identity.birth_date=members[idx].birth_date||"";
+  if(!identity.gender)identity.gender=members[idx].gender||"";
+  AuthService.save(identity);renderIdentityPage();renderMembers();renderFamilyOverview();
+}
+function renderPublicProfileCard(target,inviteAction=false){
+  const p=target.public_settings||{};
+  const meta=[];
+  if(p.show_region&&target.region)meta.push(target.region);
+  if(p.show_age_band&&identityAgeBand(target))meta.push(identityAgeBand(target));
+  if(p.show_gender&&target.gender)meta.push(target.gender);
+  return `<div class="public-profile-card">
+    <div class="public-profile-avatar">${escapeHtml((target.avatar_text||target.nickname||"Y").slice(0,1))}</div>
+    <div class="public-profile-name">${escapeHtml(target.nickname||"用户")}</div>
+    <div class="public-profile-id">用户 ID：${escapeHtml(target.yuni_id||"-")}</div>
+    ${target.bio?`<div class="public-profile-bio">${escapeHtml(target.bio)}</div>`:""}
+    ${meta.length?`<div class="public-profile-meta">${meta.map(x=>`<span>${escapeHtml(x)}</span>`).join("")}</div>`:""}
+    ${inviteAction?`<button class="primary-btn" style="margin-top:16px" onclick="sendDemoFamilyInvite('${escapeHtml(target.user_id)}')">邀请加入家庭</button>`:""}
+    <div class="public-private-note">🔒 陌生人无法查看健康记录、饮食、疾病、过敏、用药和提醒等私人信息。</div>
+  </div>`;
+}
+function renderIdentityPublicSettings(){
+  const i=AuthService.current(),p=i.public_settings||{};
+  const set=(id,value,checked=false)=>{const el=document.getElementById(id);if(el){if(checked)el.checked=Boolean(value);else el.value=value||""}};
+  set("identityNickname",i.nickname);set("identityRegion",i.region);set("identityBio",i.bio);
+  set("identityShowRegion",p.show_region,true);set("identityShowAgeBand",p.show_age_band,true);set("identityShowGender",p.show_gender,true);
+  const box=document.getElementById("inlinePublicCardPreview");if(box)box.innerHTML=renderPublicProfileCard(i,false);
+}
+async function saveIdentityPublicSettings(){
+  const i=AuthService.current();
+  i.nickname=document.getElementById("identityNickname")?.value.trim()||i.nickname||"我的健康主页";
+  i.region=document.getElementById("identityRegion")?.value.trim()||"";
+  i.bio=document.getElementById("identityBio")?.value.trim()||"";
+  i.avatar_text=(i.nickname||"我").slice(0,1);
+  i.public_settings={
+    show_region:Boolean(document.getElementById("identityShowRegion")?.checked),
+    show_age_band:Boolean(document.getElementById("identityShowAgeBand")?.checked),
+    show_gender:Boolean(document.getElementById("identityShowGender")?.checked)
+  };
+  AuthService.save(i);
+  if(currentSupabaseUser){
+    const {data,error}=await yuniSupabase.from("user_profile").update({
+      nickname:i.nickname,
+      region:i.region||null,
+      bio:i.bio||null,
+      show_region:i.public_settings.show_region,
+      show_age_band:i.public_settings.show_age_band,
+      show_gender:i.public_settings.show_gender,
+      updated_at:new Date().toISOString()
+    }).eq("user_id",currentSupabaseUser.id).select().maybeSingle();
+    if(error){console.error(error);alert("本地界面已更新，但 Supabase 保存失败："+authErrorText(error));return}
+    if(data)currentSupabaseProfile=data;
+  }
+  renderIdentityTopbar();renderIdentityPublicSettings();alert("公开名片已保存到 Supabase。");
+}
+function previewPublicCard(){
+  const box=document.getElementById("publicCardModalBody");if(box)box.innerHTML=renderPublicProfileCard(AuthService.current(),false);
+  document.getElementById("publicCardModal")?.classList.add("show");
+}
+function closePublicCardModal(){document.getElementById("publicCardModal")?.classList.remove("show")}
+
+let cloudFamilyMembers=[];
+let cloudFamilyInvites=[];
+let cloudFamilyInfo=null;
+let cloudFamilySearchResult=null;
+
+function cloudFamilyRole(){
+  if(!currentSupabaseUser)return null;
+  const row=cloudFamilyMembers.find(x=>x.user_id===currentSupabaseUser.id);
+  return row?Number(row.role):null;
+}
+function cloudFamilyId(){
+  const own=cloudFamilyMembers.find(x=>x.user_id===currentSupabaseUser?.id);
+  return own?.family_id||cloudFamilyInfo?.id||null;
+}
+function familyInviteStatusText(status){
+  const n=Number(status);
+  if(n===0)return "待管理员审核";
+  if(n===1)return "等待受邀人处理";
+  if(n===2)return "已加入";
+  if(n===3)return "已拒绝";
+  if(n===4)return "已关闭";
+  return `状态 ${n}`;
+}
+function familyMemberRelationText(row){
+  if(row.user_id===currentSupabaseUser?.id)return "本人";
+  return Number(row.role)===1?"家庭管理员":"家庭成员";
+}
+function mergeCloudFamilyMembersIntoLocal(){
+  if(!currentSupabaseUser)return;
+  const current=loadData(STORAGE_KEYS.FAMILY_MEMBERS,[]);
+  const cloudUserIds=new Set(cloudFamilyMembers.map(x=>x.user_id));
+  const retained=current.filter(m=>!m.account_user_id || !cloudUserIds.has(m.account_user_id));
+
+  const cloudRows=cloudFamilyMembers.map(row=>{
+    const existing=current.find(m=>m.account_user_id===row.user_id) || {};
+    return {
+      ...existing,
+      member_id:existing.member_id || `account_${row.user_id}`,
+      name:row.nickname||existing.name||"家庭成员",
+      relation:familyMemberRelationText(row),
+      birth_date:existing.birth_date||"",
+      gender:existing.gender||"",
+      blood_type:existing.blood_type||"",
+      allergy_history:existing.allergy_history||"",
+      drug_allergy:existing.drug_allergy||"",
+      chronic_disease:existing.chronic_disease||"",
+      common_medicine:existing.common_medicine||"",
+      account_user_id:row.user_id,
+      health_id:row.health_id||existing.health_id||"",
+      is_cloud_account:true,
+      family_role:Number(row.role),
+      family_status:Number(row.status),
+      avatar_path:row.avatar_path||existing.avatar_path||"",
+      create_date:existing.create_date||formatDate(),
+      update_date:formatDate()
+    };
+  });
+
+  saveData(STORAGE_KEYS.FAMILY_MEMBERS,[...cloudRows,...retained]);
+}
+async function syncFamilyCloud(){
+  if(!currentSupabaseUser)return;
+
+  const {data:members,error:memberError}=await yuniSupabase.rpc("get_my_family_members");
+  if(memberError)throw memberError;
+  cloudFamilyMembers=Array.isArray(members)?members:[];
+
+  const familyIds=[...new Set(cloudFamilyMembers.map(x=>x.family_id).filter(Boolean))];
+  cloudFamilyInfo=null;
+  if(familyIds.length){
+    const {data:fams,error:famError}=await yuniSupabase
+      .from("families")
+      .select("id,name,owner_user_id")
+      .in("id",familyIds)
+      .limit(1);
+    if(famError)throw famError;
+    cloudFamilyInfo=fams?.[0]||{id:familyIds[0],name:"我的家"};
+  }
+
+  const {data:invites,error:inviteError}=await yuniSupabase
+    .from("family_invites")
+    .select("id,family_id,inviter_user_id,invitee_user_id,status,created_at,responded_at,reviewed_by_user_id,reviewed_at")
+    .order("created_at",{ascending:false});
+  if(inviteError)throw inviteError;
+  cloudFamilyInvites=Array.isArray(invites)?invites:[];
+
+  mergeCloudFamilyMembersIntoLocal();
+
+  const famState={
+    family_id:cloudFamilyInfo?.id||"",
+    family_name:cloudFamilyInfo?.name||"我的家",
+    owner_user_id:cloudFamilyInfo?.owner_user_id||"",
+    relations:cloudFamilyMembers.map(x=>({
+      user_id:x.user_id,
+      role:Number(x.role)===1?"admin":"member",
+      status:Number(x.status)===1?"active":"inactive"
+    }))
+  };
+  FamilyService.saveState(famState);
+}
+function invitePersonLabel(invite){
+  const otherId=invite.inviter_user_id===currentSupabaseUser?.id?invite.invitee_user_id:invite.inviter_user_id;
+  const member=cloudFamilyMembers.find(x=>x.user_id===otherId);
+  if(member)return `${member.nickname||"用户"}${member.health_id?` · ${member.health_id}`:""}`;
+  if(cloudFamilySearchResult?.user_id===otherId){
+    return `${cloudFamilySearchResult.nickname||"用户"}${cloudFamilySearchResult.health_id?` · ${cloudFamilySearchResult.health_id}`:""}`;
+  }
+  return `用户 ${String(otherId||"").slice(0,8)}`;
+}
+async function refreshFamilyUi(){
+  try{
+    await syncFamilyCloud();
+    try{await syncSharePermissionsCloud()}catch(permissionErr){console.warn("共享权限刷新失败：",permissionErr)}
+    renderMembers();
+    renderFamilyOverview();
+    renderIdentityFamily();
+    renderPermissionGroups();
+    renderHome();
+  }catch(err){
+    console.error("家庭数据刷新失败：",err);
+    alert("家庭数据刷新失败："+authErrorText(err));
+  }
+}
+
+function fillDemoYuniId(id){
+  const el=document.getElementById("familySearchYuniId");
+  if(el){el.value=id;searchDemoYuniUser()}
+}
+
+async function searchDemoYuniUser(){
+  const q=(document.getElementById("familySearchYuniId")?.value||"").trim();
+  const box=document.getElementById("familySearchResult");if(!box)return;
+
+  if(!/^\d{8}$/.test(q)){
+    box.innerHTML='<div class="card-subtitle">请输入完整的 8 位用户 ID。</div>';
+    return;
+  }
+
+  box.innerHTML='<div class="card-subtitle">正在查找…</div>';
+
+  try{
+    const {data,error}=await yuniSupabase.rpc("find_user_by_health_id",{p_health_id:q});
+    if(error)throw error;
+    const row=Array.isArray(data)?data[0]:data;
+    if(!row){
+      cloudFamilySearchResult=null;
+      box.innerHTML='<div class="card-subtitle">没有找到这个用户 ID，请检查后重试。</div>';
+      return;
+    }
+    if(row.user_id===currentSupabaseUser?.id){
+      box.innerHTML='<div class="card-subtitle">这是你自己的用户 ID，不需要邀请自己。</div>';
+      return;
+    }
+
+    cloudFamilySearchResult=row;
+    const target={
+      user_id:row.user_id,
+      yuni_id:row.health_id,
+      health_id:row.health_id,
+      nickname:row.nickname,
+      avatar_text:(row.nickname||"用户").slice(0,1),
+      avatar_path:row.avatar_path||"",
+      bio:row.bio||"",
+      region:row.region||"",
+      gender:profileGenderText(row.gender),
+      birth_date:"",
+      public_settings:{
+        show_region:Boolean(row.region),
+        show_age_band:Boolean(row.age_band),
+        show_gender:row.gender!=null
+      },
+      age_band:row.age_band||""
+    };
+
+    box.innerHTML=renderPublicProfileCard(target,true);
+  }catch(err){
+    console.error(err);
+    box.innerHTML=`<div class="card-subtitle">查找失败：${escapeHtml(authErrorText(err))}</div>`;
+  }
+}
+
+async function sendDemoFamilyInvite(userId){
+  const familyId=cloudFamilyId();
+  if(!familyId){
+    alert("你当前还没有可用的家庭关系，暂时不能发送邀请。");
+    return;
+  }
+  if(!userId)return;
+
+  const duplicate=cloudFamilyInvites.find(i=>
+    i.family_id===familyId &&
+    i.invitee_user_id===userId &&
+    [0,1].includes(Number(i.status))
+  );
+  if(duplicate){
+    alert("这个用户已经有一条正在处理中的家庭邀请。");
+    return;
+  }
+
+  try{
+    const {error}=await yuniSupabase.rpc("create_family_invite",{
+      p_family_id:familyId,
+      p_invitee_user_id:userId
+    });
+    if(error)throw error;
+
+    await refreshFamilyUi();
+    const role=cloudFamilyRole();
+    alert(role===1
+      ? "邀请已创建。管理员邀请会进入下一步等待对方接受。"
+      : "邀请申请已提交，正在等待家庭管理员审核。");
+  }catch(err){
+    console.error(err);
+    alert("发送邀请失败："+authErrorText(err));
+  }
+}
+
+async function reviewCloudFamilyInvite(inviteId,approve){
+  if(!confirm(approve?"确定批准这条家庭邀请吗？":"确定拒绝这条家庭邀请吗？"))return;
+  try{
+    const {error}=await yuniSupabase.rpc("review_family_invite",{
+      p_invite_id:inviteId,
+      p_approve:Boolean(approve)
+    });
+    if(error)throw error;
+    await refreshFamilyUi();
+  }catch(err){
+    console.error(err);
+    alert("审核失败："+authErrorText(err));
+  }
+}
+
+async function respondCloudFamilyInvite(inviteId,accept){
+  if(!confirm(accept?"确定加入这个家庭吗？":"确定拒绝这条邀请吗？"))return;
+  try{
+    const {error}=await yuniSupabase.rpc("respond_family_invite",{
+      p_invite_id:inviteId,
+      p_accept:Boolean(accept)
+    });
+    if(error)throw error;
+    await refreshFamilyUi();
+  }catch(err){
+    console.error(err);
+    alert("处理邀请失败："+authErrorText(err));
+  }
+}
+
+/* 保留旧函数名，避免旧按钮/旧浏览器缓存调用时报错；内部已经改为真实 Supabase。 */
+function cancelDemoInvite(){alert("云端邀请暂不提供直接取消；待审核/待接受状态由对应流程处理。")}
+function acceptDemoReceivedInvite(inviteId){return respondCloudFamilyInvite(inviteId,true)}
+function rejectDemoReceivedInvite(inviteId){return respondCloudFamilyInvite(inviteId,false)}
+
+async function scrollToFamilyInvite(){
+  showPageById("members","家庭成员");
+  try{await syncFamilyCloud()}catch(err){console.warn("家庭刷新失败：",err)}
+  renderMembers();
+  renderIdentityFamily();
+  renderFamilyOverview();
+  setTimeout(()=>document.getElementById("familyInviteManager")?.scrollIntoView({behavior:"smooth",block:"start"}),50);
+}
+function renderIdentityFamily(){
+  const currentId=currentSupabaseUser?.id;
+  const role=cloudFamilyRole();
+  const familyName=cloudFamilyInfo?.name||FamilyService.state().family_name||"我的家";
+  const summary=document.getElementById("identityFamilySummary");
+
+  if(summary){
+    summary.innerHTML=`<div class="family-summary-box">
+      <div class="family-summary-title">${escapeHtml(familyName)}</div>
+      <div class="family-summary-row"><span>家庭关系账号</span><strong>${cloudFamilyMembers.length} 个</strong></div>
+      <div class="family-summary-row"><span>本地代管档案</span><strong>${loadData(STORAGE_KEYS.FAMILY_MEMBERS,[]).filter(m=>!m.account_user_id).length} 份</strong></div>
+      <div class="family-summary-row"><span>我的角色</span><strong>${role===1?"家庭管理员":role===2?"家庭成员":"未加入家庭"}</strong></div>
+      <div class="card-subtitle" style="margin-top:10px">家庭关系来自 Supabase。管理员身份不会自动获得其他成员的健康查看权限。</div>
+    </div>`;
+  }
+
+  const received=document.getElementById("receivedInviteList");
+  const sent=document.getElementById("sentInviteList");
+
+  const incoming=cloudFamilyInvites.filter(i=>i.invitee_user_id===currentId && Number(i.status)!==2);
+  const outgoingOrReview=cloudFamilyInvites.filter(i=>
+    i.inviter_user_id===currentId ||
+    (role===1 && Number(i.status)===0 && i.inviter_user_id!==currentId)
+  );
+
+  if(received){
+    received.innerHTML=incoming.length?incoming.map(i=>{
+      const status=Number(i.status);
+      const canRespond=status===1;
+      return `<div class="invite-card">
+        <div class="invite-card-top">
+          <div><strong>${escapeHtml(invitePersonLabel(i))}</strong><small>邀请你加入 ${escapeHtml(familyName)}</small></div>
+          <span class="online-pack-version">${escapeHtml(familyInviteStatusText(status))}</span>
+        </div>
+        ${canRespond?`<div class="invite-actions">
+          <button class="primary-btn" onclick="respondCloudFamilyInvite('${i.id}',true)">接受</button>
+          <button class="secondary-btn" onclick="respondCloudFamilyInvite('${i.id}',false)">拒绝</button>
+        </div>`:""}
+      </div>`;
+    }).join(""):'<div class="card-subtitle">暂无收到的待处理邀请。</div>';
+  }
+
+  if(sent){
+    sent.innerHTML=outgoingOrReview.length?outgoingOrReview.map(i=>{
+      const status=Number(i.status);
+      const needReview=role===1 && status===0;
+      const own=i.inviter_user_id===currentId;
+      return `<div class="invite-card">
+        <div class="invite-card-top">
+          <div><strong>${escapeHtml(invitePersonLabel(i))}</strong>
+          <small>${own?"你发起的邀请":"家庭成员发起的邀请"}</small></div>
+          <span class="online-pack-version">${escapeHtml(familyInviteStatusText(status))}</span>
+        </div>
+        ${needReview?`<div class="invite-actions">
+          <button class="primary-btn" onclick="reviewCloudFamilyInvite('${i.id}',true)">批准</button>
+          <button class="secondary-btn" onclick="reviewCloudFamilyInvite('${i.id}',false)">拒绝</button>
+        </div>`:""}
+      </div>`;
+    }).join(""):'<div class="card-subtitle">暂无发出的邀请或待审核申请。</div>';
+  }
+}
+function renderPermissionGroups(){
+  const box=document.getElementById("permissionGroups");if(!box)return;
+  const p=cloudSharePermission?normalizeSharePermission(cloudSharePermission):PermissionService.get();
+  const familyId=cloudFamilyId();
+
+  if(!familyId){
+    box.innerHTML=`<div class="permission-group" style="grid-column:1/-1">
+      <h4>尚未加入家庭</h4>
+      <div class="card-subtitle">加入家庭后，你可以在这里决定家人能查看哪些健康资料。</div>
+    </div>`;
+    return;
+  }
+
+  const groups={健康:[],生活:[],敏感:[]};
+  Object.entries(SHARE_PERMISSION_LABELS).forEach(([key,v])=>groups[v[2]].push([key,...v]));
+
+  box.innerHTML=Object.entries(groups).map(([group,items])=>`
+    <div class="permission-group">
+      <h4>${group==="健康"?"健康数据（默认关闭）":group==="生活"?"生活协作":"敏感信息（默认关闭）"}</h4>
+      ${items.map(([key,label,desc])=>`
+        <label class="permission-row">
+          <span><strong>${escapeHtml(label)}</strong><small>${escapeHtml(desc)}</small></span>
+          <span class="toggle-wrap">
+            <input type="checkbox"
+              ${p[key]?"checked":""}
+              ${cloudSharePermissionLoading?"disabled":""}
+              onchange="updateSharePermission('${key}',this.checked,this)">
+            <i></i>
+          </span>
+        </label>`).join("")}
+    </div>`).join("");
+
+  box.insertAdjacentHTML("beforeend",`
+    <div class="privacy-rule-banner" style="grid-column:1/-1;margin-top:0">
+      🔐 这些开关保存到 Supabase，只控制当前家庭对你的资料查看权限。家庭管理员不会因为是管理员而自动获得全部健康数据。
+    </div>`);
+}
+
+async function updateSharePermission(key,value,inputEl){
+  const previous=PermissionService.get();
+  const oldValue=Boolean(previous[key]);
+  previous[key]=Boolean(value);
+  PermissionService.save(previous);
+
+  if(inputEl)inputEl.disabled=true;
+  try{
+    await saveSharePermissionCloud(key,value);
+    renderPermissionGroups();
+  }catch(err){
+    console.error("共享权限保存失败：",err);
+    const rollback=PermissionService.get();
+    rollback[key]=oldValue;
+    PermissionService.save(rollback);
+    if(inputEl){inputEl.checked=oldValue;inputEl.disabled=false}
+    alert("共享权限保存失败："+authErrorText(err));
+  }
+}
+function renderSyncCenter(){
+  const box=document.getElementById("syncStats");if(!box)return;
+  const s=SyncService.state();
+  const last=s.last_sync?new Date(s.last_sync).toLocaleString():"尚未同步";
+  box.innerHTML=`<div class="sync-stat"><span>本机待同步</span><strong>${Number(s.pending_local||0)} 条</strong></div><div class="sync-stat"><span>上次同步</span><strong style="font-size:11px">${escapeHtml(last)}</strong></div><div class="sync-stat"><span>当前模式</span><strong style="font-size:11px">本地演示</strong></div>`;
+  const result=document.getElementById("syncResultBox");
+  if(result&&!s.last_result)result.innerHTML='<div class="card-subtitle">当前没有真实云端连接，点击“模拟一次手动同步”只演示状态，不会上传健康资料。</div>';
+}
+async function simulateManualSync(){
+  const r=await SyncService.sync();
+  const box=document.getElementById("syncResultBox");
+  if(box)box.innerHTML=`<div class="sync-result"><strong>演示同步完成</strong><br>↑ 上传 ${r.uploaded} 条　↓ 获取 ${r.downloaded} 条　✓ 自动合并 ${r.merged} 条　⚠ 冲突 ${r.conflicts} 条<br><span style="color:var(--text-light)">当前没有连接真实后端，因此不会产生真实网络传输。</span></div>`;
+  renderSyncCenter();
+}
+function showDemoConflict(){
+  const box=document.getElementById("syncConflictBody");
+  if(box)box.innerHTML=`<div class="conflict-card"><strong>妈妈 · 体重 · 2026-08-27</strong><div class="card-subtitle">这是冲突界面预览，不会修改任何真实记录。</div><div class="conflict-compare"><div class="conflict-side"><span>本机记录</span><strong>61.8 kg</strong><button class="primary-btn" style="margin-top:10px" onclick="closeSyncConflict()">保留本机</button></div><div class="conflict-side"><span>家庭云端</span><strong>62.1 kg</strong><button class="secondary-btn" style="margin-top:10px" onclick="closeSyncConflict()">使用云端</button></div></div></div>`;
+  document.getElementById("syncConflictModal")?.classList.add("show");
+}
+function closeSyncConflict(){document.getElementById("syncConflictModal")?.classList.remove("show")}
+function goIdentityShortcut(page){
+  if(page==="backup"){showPageById("backup","资料与同步");renderBackupPage();return}
+  if(page==="health"){showPageById("health","健康记录");renderHealthPage();return}
+  if(page==="diet"){showPageById("diet","饮食营养");requestAnimationFrame(renderDietPage);return}
+  if(page==="analysis"){showPageById("analysis","健康分析");requestAnimationFrame(renderAnalysisPage);return}
+  if(page==="reminder"){showPageById("reminder","健康提醒");requestAnimationFrame(renderReminderPage);return}
+}
+function renderFamilyOverview(){
+  const box=document.getElementById("familyOverviewCard");if(!box)return;
+  const members=loadData(STORAGE_KEYS.FAMILY_MEMBERS,[]);
+  const cloudCount=cloudFamilyMembers.length;
+  const assisted=members.filter(m=>!m.account_user_id).length;
+  const role=cloudFamilyRole();
+  const familyName=cloudFamilyInfo?.name||FamilyService.state().family_name||"我的家";
+  box.innerHTML=`<div class="family-overview-inner">
+    <div>
+      <div class="family-overview-title">🏡 ${escapeHtml(familyName)} · ${cloudCount} 个账号成员${assisted?` · ${assisted} 份代管档案`:""}</div>
+      <div class="family-overview-meta">${role===1?"你是家庭管理员":"你是家庭成员"} · 家庭关系已连接 Supabase</div>
+    </div>
+    <div class="family-overview-actions">
+      <button class="secondary-btn" onclick="refreshFamilyUi()">刷新</button>
+      <button class="secondary-btn" onclick="scrollToFamilyInvite()">邀请家人加入</button>
+    </div>
+  </div>`;
+}
+function memberAccountBadge(member){
+  const identity=AuthService.current();
+  if(identity.bound_profile_id===member.member_id)return `<div class="account-bind-badge">✓ 这是我的健康档案</div>`;
+  if(member.account_user_id)return `<div class="account-bind-badge">✓ 自己使用账号</div>`;
+  return `<div class="account-bind-badge unbound">由家人代为记录</div>`;
+}
+function viewFamilyHealth(memberId){
+  const member=loadData(STORAGE_KEYS.FAMILY_MEMBERS,[]).find(m=>m.member_id===memberId);if(!member)return;
+  const viewer={user_id:"u_local_me",relation:"family"},target={user_id:member.account_user_id||`profile_${member.member_id}`};
+  const identity=AuthService.current();
+  const isSelf=identity.bound_profile_id===member.member_id;
+  if(isSelf)viewer.user_id=target.user_id;
+  const check=(key)=>isSelf||PermissionService.canViewHealthType(viewer,target,key);
+  const items=[
+    ["height_weight","⚖️ 体重",identityMetricText(memberId,"weight")],
+    ["blood_pressure","❤️ 血压",identityMetricText(memberId,"blood_pressure")],
+    ["blood_sugar","🩸 血糖",identityMetricText(memberId,"blood_sugar")],
+    ["heart_rate","💓 心率",identityMetricText(memberId,"heart_rate")]
+  ];
+  document.getElementById("familyHealthViewTitle").textContent=`${member.name} · ${isSelf?"我的完整健康主页":"家庭健康名片"}`;
+  const body=document.getElementById("familyHealthViewBody");
+  if(body)body.innerHTML=`<div class="card-subtitle">${isSelf?"本人可以查看自己的全部健康资料。":"以下仅展示当前家庭共享权限允许的内容。"}</div><div class="family-health-grid">${items.map(([key,label,val])=>check(key)?`<div class="family-health-item"><span>${label}</span><strong>${escapeHtml(val)}</strong></div>`:`<div class="family-health-item locked-health-item"><span>${label}</span><strong>🔒 未授权共享</strong></div>`).join("")}</div>
+  <div class="privacy-rule-banner" style="margin-top:14px">${isSelf?"这是本人视图。":"用药提醒和健康警报等敏感资料只有你主动开启共享后，家庭成员才可查看。"}</div>`;
+  document.getElementById("familyHealthViewModal")?.classList.add("show");
+}
+function closeFamilyHealthView(){document.getElementById("familyHealthViewModal")?.classList.remove("show")}
+
 function renderMembers(){
   const arr=loadData(STORAGE_KEYS.FAMILY_MEMBERS,[]);
   memberGrid.innerHTML=arr.length?arr.map(m=>{
@@ -3218,11 +4697,11 @@ function renderMembers(){
       : (m.common_medicine? "已有常用药文字记录":"暂无记录");
 
     return `<article class="member-card" data-member-id="${m.member_id}">
-      <div class="member-card-top">${getMemberAvatarHtml(m,60)}<div><div class="member-name">${escapeHtml(m.name)}</div><div class="member-basic">${escapeHtml(m.relation||"-")} · ${escapeHtml(m.gender||"未填写")} · ${calculateAge(m.birth_date)} 岁</div></div></div>
+      <div class="member-card-top">${getMemberAvatarHtml(m,60)}<div><div class="member-name">${escapeHtml(m.name)}</div><div class="member-basic">${escapeHtml(m.relation||"-")}${m.gender?` · ${escapeHtml(m.gender)}`:""}${calculateAge(m.birth_date)!=null?` · ${calculateAge(m.birth_date)} 岁`:""}</div>${memberAccountBadge(m)}</div></div>
 
       <div class="member-info-grid">
         <div><div class="member-info-label">血型</div><div class="member-info-value">${escapeHtml(m.blood_type||"未填写")}</div></div>
-        <div><div class="member-info-label">出生日期</div><div class="member-info-value">${m.birth_date}</div></div>
+        <div><div class="member-info-label">用户 ID / 出生日期</div><div class="member-info-value">${escapeHtml(m.health_id||m.birth_date||"未填写")}</div></div>
       </div>
 
       <div class="member-safety-section">
@@ -3247,9 +4726,11 @@ function renderMembers(){
 
       ${renderMemberStreakCompact(m.member_id)}
 
-      <div class="member-actions"><button class="secondary-btn" onclick="editMember('${m.member_id}')">编辑资料</button><button class="danger-btn" onclick="deleteMember('${m.member_id}')">删除</button></div>
+      <div class="member-actions"><button class="secondary-btn" onclick="viewFamilyHealth('${m.member_id}')">查看健康主页</button><button class="secondary-btn" onclick="editMember('${m.member_id}')">编辑资料</button><button class="danger-btn" onclick="deleteMember('${m.member_id}')">删除</button></div>
     </article>`;
   }).join(""):`<div class="card empty-state"><div class="empty-title">暂无家庭成员</div></div>`;
+  renderFamilyOverview();
+  renderIdentityFamily();
 }
 function openMemberModal(m=null){
   memberForm.reset();
@@ -3432,16 +4913,45 @@ function renderHealthDynamicFields(){
   healthDynamicFields.innerHTML=html;healthRecordDate.value=formatDate();healthFormError.textContent="";
 }
 function getNum(id){const e=document.getElementById(id);if(!e||String(e.value).trim()==="")return null;const v=Number(e.value);return Number.isFinite(v)?v:null}
-function submitHealthRecord(e){
-  e.preventDefault();healthFormError.textContent="";const mid=healthMemberSelect.value,date=healthRecordDate.value;
-  if(!mid){healthFormError.textContent="请先选择成员。";return}if(!date||date>formatDate()){healthFormError.textContent="请选择不晚于今天的记录日期。";return}
+async function submitHealthRecord(e){
+  e.preventDefault();
+  healthFormError.textContent="";
+  const mid=healthMemberSelect.value,date=healthRecordDate.value;
+  if(!mid){healthFormError.textContent="请先选择成员。";return}
+  if(!date||date>formatDate()){healthFormError.textContent="请选择不晚于今天的记录日期。";return}
+
   const r={record_id:generateId("h"),member_id:mid,record_type:currentHealthType,height_value:null,weight_value:null,systolic:null,diastolic:null,blood_sugar_value:null,sugar_period:null,heart_rate_value:null,record_date:date,record_time:getCurrentTime(),remark:healthRemark.value.trim()};
   if(currentHealthType==="height"){const v=getNum("healthHeight");if(v===null||v<40||v>250){healthFormError.textContent="请输入 40–250 cm 的有效身高。";return}r.height_value=v}
   if(currentHealthType==="weight"){const v=getNum("healthWeight");if(v===null||v<2||v>300){healthFormError.textContent="请输入 2–300 kg 的有效体重。";return}r.weight_value=v}
   if(currentHealthType==="blood_pressure"){const s=getNum("healthSystolic"),d=getNum("healthDiastolic");if(s===null||d===null||s<50||s>260||d<30||d>160||s<=d){healthFormError.textContent="请检查血压值：收缩压应高于舒张压，并处于可录入范围。";return}r.systolic=s;r.diastolic=d}
   if(currentHealthType==="blood_sugar"){const v=getNum("healthBloodSugar");if(v===null||v<1||v>35){healthFormError.textContent="请输入 1–35 mmol/L 的有效血糖值。";return}r.blood_sugar_value=v;r.sugar_period=healthSugarPeriod.value}
   if(currentHealthType==="heart_rate"){const v=getNum("healthHeartRate");if(v===null||v<25||v>240){healthFormError.textContent="请输入 25–240 bpm 的有效心率。";return}r.heart_rate_value=v}
-  const arr=loadData(STORAGE_KEYS.HEALTH_RECORDS,[]);arr.push(r);saveData(STORAGE_KEYS.HEALTH_RECORDS,arr);healthRecordForm.reset();renderHome();renderHealthPage();
+
+  const isOwnCloudRecord=currentSupabaseUser && mid===currentAccountMemberId();
+  if(isOwnCloudRecord){
+    try{
+      const payload=localHealthRecordToDb(r);
+      const {error}=await yuniSupabase.from("health_measurements").insert(payload);
+      if(error)throw error;
+      await syncHealthMeasurementsFromSupabase();
+      healthRecordForm.reset();
+      renderHome();
+      renderHealthPage();
+      return;
+    }catch(err){
+      console.error("保存云端健康记录失败：",err);
+      healthFormError.textContent="保存失败："+authErrorText(err);
+      return;
+    }
+  }
+
+  // 尚未迁移的本地代管成员暂时继续保存在浏览器，后续家庭阶段再迁移。
+  const arr=loadData(STORAGE_KEYS.HEALTH_RECORDS,[]);
+  arr.push(r);
+  saveData(STORAGE_KEYS.HEALTH_RECORDS,arr);
+  healthRecordForm.reset();
+  renderHome();
+  renderHealthPage();
 }
 function getHealthStatus(r,p){
   if(r.record_type==="height"||r.record_type==="weight")return {text:"已记录",className:"status-neutral"};
@@ -3499,9 +5009,33 @@ function renderHealthHistory(){
   }
   healthHistoryContainer.innerHTML=`<table class="history-table"><thead>${head}</thead><tbody>${body}</tbody></table>`;
 }
-function deleteHealthRecord(rid){
-  const arr=loadData(STORAGE_KEYS.HEALTH_RECORDS,[]),r=arr.find(x=>x.record_id===rid);if(!r||!confirm(`确定删除这条${getRecordTypeText(r.record_type)}记录吗？`))return;
-  saveData(STORAGE_KEYS.HEALTH_RECORDS,arr.filter(x=>x.record_id!==rid));renderHome();renderHealthPage();
+async function deleteHealthRecord(rid){
+  const arr=loadData(STORAGE_KEYS.HEALTH_RECORDS,[]);
+  const r=arr.find(x=>x.record_id===rid);
+  if(!r||!confirm(`确定删除这条${getRecordTypeText(r.record_type)}记录吗？`))return;
+
+  const isOwnCloudRecord=currentSupabaseUser && r.member_id===currentAccountMemberId() && r.cloud;
+  if(isOwnCloudRecord){
+    try{
+      const {error}=await yuniSupabase
+        .from("health_measurements")
+        .delete()
+        .eq("id",rid)
+        .eq("user_id",currentSupabaseUser.id);
+      if(error)throw error;
+      await syncHealthMeasurementsFromSupabase();
+      renderHome();
+      renderHealthPage();
+      return;
+    }catch(err){
+      alert("删除失败："+authErrorText(err));
+      return;
+    }
+  }
+
+  saveData(STORAGE_KEYS.HEALTH_RECORDS,arr.filter(x=>x.record_id!==rid));
+  renderHome();
+  renderHealthPage();
 }
 function renderHealthPage(){renderHealthMemberOptions();renderHealthProfile();renderHealthDynamicFields();renderHealthHistory()}
 
@@ -6506,6 +8040,159 @@ function getReminderLogCompletedTime(log){
   if(iso.includes("T"))return iso.slice(11,16);
   return "";
 }
+
+const REMINDER_TYPE_TO_DB={medicine:1,checkup:2,follow_up:3,other:4};
+const REMINDER_TYPE_FROM_DB={1:"medicine",2:"checkup",3:"follow_up",4:"other"};
+
+function reminderJsonRuleFromLocal(r){
+  return {
+    repeat_daily:Boolean(r.repeat_daily),
+    reminder_window:r.reminder_window||null,
+    medicine:r.remind_type==="medicine"?{
+      medicine_id:r.medicine_id||"",
+      name:r.medicine_name||"",
+      strength:r.medicine_strength||"",
+      dose:r.dose??"",
+      dose_unit:r.dose_unit||"",
+      timing:r.timing||"",
+      source:r.medicine_source||""
+    }:null
+  };
+}
+function safeJsonValue(v){
+  if(!v)return {};
+  if(typeof v==="object")return v;
+  try{return JSON.parse(v)}catch(e){return {}}
+}
+function dbReminderToLocal(row){
+  const rule=safeJsonValue(row.repeat_rule);
+  const med=rule.medicine||{};
+  const type=REMINDER_TYPE_FROM_DB[Number(row.type)]||"other";
+  return {
+    remind_id:row.id,
+    member_id:currentAccountMemberId(),
+    remind_type:type,
+    content:row.title||row.description||"",
+    remind_date:row.start_date||"",
+    remind_time:row.scheduled_time?String(row.scheduled_time).slice(0,5):"09:00",
+    repeat_daily:Boolean(rule.repeat_daily),
+    status:row.active===false?"completed":"pending",
+    medicine_id:med.medicine_id||"",
+    medicine_name:med.name||"",
+    medicine_strength:med.strength||"",
+    dose:med.dose??"",
+    dose_unit:med.dose_unit||"",
+    timing:med.timing||"",
+    medicine_source:med.source||"",
+    reminder_window:rule.reminder_window||{
+      mode:"minutes",
+      preset:"standard",
+      second_reminder_after:row.second_reminder_minutes||30,
+      expire_after:row.grace_minutes||60
+    },
+    last_completed_date:null,
+    completed_at:null,
+    cloud:true
+  };
+}
+function dbReminderLogToLocal(row,reminderMap){
+  const r=reminderMap.get(row.reminder_id)||{};
+  const scheduled=row.scheduled_for?new Date(row.scheduled_for):null;
+  return normalizeReminderLog({
+    log_id:row.id,
+    reminder_id:row.reminder_id,
+    member_id:currentAccountMemberId(),
+    type:r.remind_type||"other",
+    content:r.content||"",
+    scheduled_date:scheduled?formatDate(scheduled):"",
+    scheduled_time:scheduled?`${String(scheduled.getHours()).padStart(2,"0")}:${String(scheduled.getMinutes()).padStart(2,"0")}`:"",
+    completed_at:row.completed_at||"",
+    repeat_daily:Boolean(r.repeat_daily),
+    medicine_name:r.medicine_name||"",
+    medicine_strength:r.medicine_strength||"",
+    dose:r.dose??"",
+    dose_unit:r.dose_unit||"",
+    timing:r.timing||"",
+    medicine_source:r.medicine_source||"",
+    cloud:true
+  });
+}
+function dbMedicationLogToLocal(row,reminderMap){
+  const r=reminderMap.get(row.reminder_id)||{};
+  const taken=row.taken_at?new Date(row.taken_at):null;
+  const note=safeJsonValue(row.note);
+  return {
+    log_id:row.id,
+    member_id:currentAccountMemberId(),
+    remind_id:row.reminder_id||"",
+    scheduled_date:note.scheduled_date||"",
+    medicine_id:r.medicine_id||"",
+    medicine_name:row.medicine_name||r.medicine_name||"",
+    medicine_strength:r.medicine_strength||"",
+    dose:note.dose??row.dose??"",
+    dose_unit:note.dose_unit||r.dose_unit||"",
+    timing:note.timing||r.timing||"",
+    medicine_source:note.medicine_source||r.medicine_source||"",
+    taken_date:taken?formatDate(taken):"",
+    taken_time:taken?`${String(taken.getHours()).padStart(2,"0")}:${String(taken.getMinutes()).padStart(2,"0")}`:"",
+    created_at:row.created_at||row.taken_at||"",
+    cloud:true
+  };
+}
+async function syncReminderCloud(){
+  if(!currentSupabaseUser)return;
+  const ownId=currentAccountMemberId();
+
+  const {data:reminderRows,error:reminderError}=await yuniSupabase
+    .from("reminders")
+    .select("id,user_id,title,type,description,start_date,scheduled_time,repeat_rule,grace_minutes,second_reminder_minutes,active,created_at,updated_at,deleted_at")
+    .eq("user_id",currentSupabaseUser.id)
+    .is("deleted_at",null)
+    .order("start_date",{ascending:true});
+  if(reminderError)throw reminderError;
+
+  const localReminders=(reminderRows||[]).map(dbReminderToLocal);
+  const reminderMap=new Map(localReminders.map(r=>[r.remind_id,r]));
+
+  const {data:logRows,error:logError}=await yuniSupabase
+    .from("reminder_logs")
+    .select("id,reminder_id,user_id,scheduled_for,status,completed_at,note,created_at,updated_at")
+    .eq("user_id",currentSupabaseUser.id)
+    .order("scheduled_for",{ascending:false});
+  if(logError)throw logError;
+
+  const {data:medRows,error:medError}=await yuniSupabase
+    .from("medication_logs")
+    .select("id,user_id,reminder_id,medicine_name,dose,taken_at,status,note,created_at,updated_at")
+    .eq("user_id",currentSupabaseUser.id)
+    .order("taken_at",{ascending:false});
+  if(medError)throw medError;
+
+  const oldReminders=loadData(STORAGE_KEYS.REMINDERS,[]).filter(r=>normalizeReminder(r).member_id!==ownId);
+  saveData(STORAGE_KEYS.REMINDERS,[...oldReminders,...localReminders]);
+
+  const oldLogs=loadReminderLogs().filter(l=>normalizeReminderLog(l).member_id!==ownId);
+  saveReminderLogs([...oldLogs,...(logRows||[]).map(row=>dbReminderLogToLocal(row,reminderMap))]);
+
+  const oldMed=loadData(STORAGE_KEYS.MEDICATION_LOGS,[]).filter(l=>l.member_id!==ownId);
+  saveData(STORAGE_KEYS.MEDICATION_LOGS,[...oldMed,...(medRows||[]).map(row=>dbMedicationLogToLocal(row,reminderMap))]);
+}
+function localReminderToDb(r){
+  const w=normalizeReminderWindow(r.reminder_window,r.remind_type);
+  return {
+    user_id:currentSupabaseUser.id,
+    title:r.content,
+    type:REMINDER_TYPE_TO_DB[r.remind_type]||4,
+    description:null,
+    start_date:r.remind_date,
+    scheduled_time:r.remind_time||null,
+    repeat_rule:reminderJsonRuleFromLocal(r),
+    grace_minutes:w.mode==="day"?0:Number(w.expire_after||0),
+    second_reminder_minutes:Number(w.second_reminder_after||0),
+    active:r.status!=="completed"
+  };
+}
+
 function normalizeReminderLog(log){
   return {
     ...log,
@@ -6823,24 +8510,24 @@ function fillMedicationPlan(){
   document.getElementById("reminderContent").value = content;
 }
 
-function saveReminder(event){
+async function saveReminder(event){
   event.preventDefault();
-  const error = document.getElementById("reminderFormError");
-  error.textContent = "";
+  const error=document.getElementById("reminderFormError");
+  error.textContent="";
 
-  const memberId = document.getElementById("reminderMember").value;
-  const type = document.getElementById("reminderType").value;
-  const content = document.getElementById("reminderContent").value.trim();
-  const date = document.getElementById("reminderDate").value;
-  const time = document.getElementById("reminderTime").value;
-  const repeatDaily = document.getElementById("reminderRepeatDaily").checked;
+  const memberId=document.getElementById("reminderMember").value;
+  const type=document.getElementById("reminderType").value;
+  const content=document.getElementById("reminderContent").value.trim();
+  const date=document.getElementById("reminderDate").value;
+  const time=document.getElementById("reminderTime").value;
+  const repeatDaily=document.getElementById("reminderRepeatDaily").checked;
 
-  if(!memberId || !type || !content || !date || !time){
-    error.textContent = "请填写成员、类型、内容、日期和时间。";
+  if(!memberId||!type||!content||!date||!time){
+    error.textContent="请填写成员、类型、内容、日期和时间。";
     return;
   }
 
-  const reminder = {
+  const reminder={
     remind_id:generateId("r"),
     member_id:memberId,
     remind_type:type,
@@ -6862,46 +8549,52 @@ function saveReminder(event){
     update_date:formatDate()
   };
 
-  if(type === "medicine"){
-    const medicineName = document.getElementById("reminderMedicineName").value.trim();
-    const doseText = document.getElementById("reminderDose").value;
-    const dose = doseText === "" ? "" : Number(doseText);
+  if(type==="medicine"){
+    const medicineName=document.getElementById("reminderMedicineName").value.trim();
+    const doseText=document.getElementById("reminderDose").value;
+    const dose=doseText===""?"":Number(doseText);
 
-    if(!medicineName){
-      error.textContent = "用药提醒请填写药物名称。";
-      return;
-    }
+    if(!medicineName){error.textContent="用药提醒请填写药物名称。";return}
+    if(doseText!==""&&(!Number.isFinite(dose)||dose<=0)){error.textContent="单次剂量必须是大于 0 的有效数字。";return}
 
-    if(doseText !== "" && (!Number.isFinite(dose) || dose <= 0)){
-      error.textContent = "单次剂量必须是大于 0 的有效数字。";
-      return;
-    }
-
-    reminder.medicine_id = document.getElementById("reminderMedicationSelect").value || "";
-    reminder.medicine_name = medicineName;
-    reminder.medicine_strength = document.getElementById("reminderMedicineStrength").value.trim();
-    reminder.dose = dose;
-    reminder.dose_unit = document.getElementById("reminderDoseUnit").value.trim();
-    reminder.medicine_source = document.getElementById("reminderMedicineSource").value || "";
-    reminder.timing = document.getElementById("reminderTiming").value.trim();
+    reminder.medicine_id=document.getElementById("reminderMedicationSelect").value||"";
+    reminder.medicine_name=medicineName;
+    reminder.medicine_strength=document.getElementById("reminderMedicineStrength").value.trim();
+    reminder.dose=dose;
+    reminder.dose_unit=document.getElementById("reminderDoseUnit").value.trim();
+    reminder.medicine_source=document.getElementById("reminderMedicineSource").value||"";
+    reminder.timing=document.getElementById("reminderTiming").value.trim();
   }
 
-  const reminders = loadData(STORAGE_KEYS.REMINDERS, []);
-  reminders.push(reminder);
-  saveData(STORAGE_KEYS.REMINDERS, reminders);
+  const isOwn=currentSupabaseUser&&memberId===currentAccountMemberId();
+
+  if(isOwn){
+    try{
+      const {error:dbError}=await yuniSupabase.from("reminders").insert(localReminderToDb(reminder));
+      if(dbError)throw dbError;
+      await syncReminderCloud();
+    }catch(err){
+      console.error("保存提醒失败：",err);
+      error.textContent="保存失败："+authErrorText(err);
+      return;
+    }
+  }else{
+    const reminders=loadData(STORAGE_KEYS.REMINDERS,[]);
+    reminders.push(reminder);
+    saveData(STORAGE_KEYS.REMINDERS,reminders);
+  }
 
   document.getElementById("reminderForm").reset();
-  document.getElementById("reminderDate").value = formatDate();
-  document.getElementById("reminderTime").value = "08:00";
-  document.getElementById("reminderType").value = "medicine";
+  document.getElementById("reminderDate").value=formatDate();
+  document.getElementById("reminderTime").value="08:00";
+  document.getElementById("reminderType").value="medicine";
   applyReminderWindowDefaultForType();
   renderReminderMemberOptions();
   handleReminderTypeChange();
   renderReminderPage();
   renderHome();
 }
-
-function completeReminder(remindId){
+async function completeReminder(remindId){
   const raw=loadData(STORAGE_KEYS.REMINDERS,[]);
   const index=raw.findIndex(r=>normalizeReminder(r).remind_id===remindId);
   if(index===-1)return;
@@ -6919,9 +8612,68 @@ function completeReminder(remindId){
   const now=new Date();
   const timingAtCompletion=getReminderTimingState(r,now);
   const completedAt=now.toISOString();
-  const takenDate=formatDate(now);
-  const takenTime=`${String(now.getHours()).padStart(2,"0")}:${String(now.getMinutes()).padStart(2,"0")}`;
+  const scheduledFor=new Date(`${scheduledDate}T${r.remind_time||"09:00"}:00`).toISOString();
+  const isOwnCloud=currentSupabaseUser&&r.member_id===currentAccountMemberId()&&r.cloud;
 
+  if(isOwnCloud){
+    try{
+      const logInsert=await yuniSupabase.from("reminder_logs").insert({
+        reminder_id:r.remind_id,
+        user_id:currentSupabaseUser.id,
+        scheduled_for:scheduledFor,
+        status:1,
+        completed_at:completedAt,
+        note:r.content||null
+      });
+      if(logInsert.error)throw logInsert.error;
+
+      if(r.remind_type==="medicine"){
+        const medInsert=await yuniSupabase.from("medication_logs").insert({
+          user_id:currentSupabaseUser.id,
+          reminder_id:r.remind_id,
+          medicine_name:r.medicine_name||extractMedicineNameFromReminder(r),
+          dose:r.dose===""||r.dose==null?null:String(r.dose),
+          taken_at:completedAt,
+          status:1,
+          note:JSON.stringify({
+            scheduled_date:scheduledDate,
+            dose:r.dose??"",
+            dose_unit:r.dose_unit||"",
+            timing:r.timing||"",
+            medicine_source:r.medicine_source||""
+          })
+        });
+        if(medInsert.error)throw medInsert.error;
+      }
+
+      const updatePayload=r.repeat_daily
+        ? {start_date:addDays(scheduledDate,1),active:true,updated_at:completedAt}
+        : {active:false,updated_at:completedAt};
+
+      const updateResult=await yuniSupabase
+        .from("reminders")
+        .update(updatePayload)
+        .eq("id",r.remind_id)
+        .eq("user_id",currentSupabaseUser.id);
+
+      if(updateResult.error)throw updateResult.error;
+
+      await syncReminderCloud();
+      showReminderToast(r.repeat_daily
+        ?"✓ 已记录今天的完成，下一次提醒已安排到明天。"
+        :"✓ 已记录完成。");
+
+      if(document.getElementById("page-reminder")?.classList.contains("active"))renderReminderPage();
+      renderHome();
+      return;
+    }catch(err){
+      console.error("完成提醒失败：",err);
+      alert("完成提醒失败："+authErrorText(err));
+      return;
+    }
+  }
+
+  // 其他尚未迁移的本地代管成员继续使用原本地流程
   reminderLogs.push({
     log_id:generateId("rl"),
     reminder_id:r.remind_id,
@@ -6960,8 +8712,8 @@ function completeReminder(remindId){
         dose_unit:r.dose_unit||"",
         timing:r.timing||"",
         medicine_source:r.medicine_source||"",
-        taken_date:takenDate,
-        taken_time:takenTime,
+        taken_date:formatDate(now),
+        taken_time:`${String(now.getHours()).padStart(2,"0")}:${String(now.getMinutes()).padStart(2,"0")}`,
         created_at:completedAt
       });
       saveData(STORAGE_KEYS.MEDICATION_LOGS,medLogs);
@@ -6973,42 +8725,48 @@ function completeReminder(remindId){
     r.completed_at=completedAt;
     r.remind_date=addDays(scheduledDate,1);
     r.status="pending";
-    r.update_date=formatDate();
   }else{
     r.status="completed";
     r.completed_at=completedAt;
-    r.update_date=formatDate();
   }
-
+  r.update_date=formatDate();
   raw[index]={...raw[index],...r};
   saveData(STORAGE_KEYS.REMINDERS,raw);
 
-  showReminderToast(r.repeat_daily
-    ?"✓ 已记录今天的完成，下一次提醒已安排到明天。"
-    :"✓ 已记录完成。");
-
-  if(document.getElementById("page-reminder")?.classList.contains("active")){
-    renderReminderPage();
-  }
+  showReminderToast(r.repeat_daily?"✓ 已记录今天的完成，下一次提醒已安排到明天。":"✓ 已记录完成。");
+  if(document.getElementById("page-reminder")?.classList.contains("active"))renderReminderPage();
   renderHome();
 }
+async function deleteReminder(remindId){
+  const reminders=loadData(STORAGE_KEYS.REMINDERS,[]);
+  const reminder=reminders.map(normalizeReminder).find(r=>r.remind_id===remindId);
+  if(!reminder)return;
 
-function deleteReminder(remindId){
-  const reminders = loadData(STORAGE_KEYS.REMINDERS, []);
-  const reminder = reminders.map(normalizeReminder).find(r=>r.remind_id===remindId);
-  if(!reminder) return;
+  if(!confirm(`确定删除“${reminder.content||"该提醒"}”的未来计划吗？\n\n以前已经完成的记录会保留。`))return;
 
-  if(!confirm(`确定删除“${reminder.content || "该提醒"}”的未来计划吗？\n\n以前已经完成的记录会保留。`)) return;
+  const isOwnCloud=currentSupabaseUser&&reminder.member_id===currentAccountMemberId()&&reminder.cloud;
+  if(isOwnCloud){
+    try{
+      const {error}=await yuniSupabase
+        .from("reminders")
+        .update({deleted_at:new Date().toISOString(),active:false,updated_at:new Date().toISOString()})
+        .eq("id",remindId)
+        .eq("user_id",currentSupabaseUser.id);
+      if(error)throw error;
+      await syncReminderCloud();
+      renderReminderPage();
+      renderHome();
+      return;
+    }catch(err){
+      alert("删除提醒失败："+authErrorText(err));
+      return;
+    }
+  }
 
-  saveData(
-    STORAGE_KEYS.REMINDERS,
-    reminders.filter(r => normalizeReminder(r).remind_id !== remindId)
-  );
-
+  saveData(STORAGE_KEYS.REMINDERS,reminders.filter(r=>normalizeReminder(r).remind_id!==remindId));
   renderReminderPage();
   renderHome();
 }
-
 function changeReminderListFilter(filter){
   reminderState.filter=filter;
   document.querySelectorAll("[data-reminder-filter]").forEach(btn=>{
@@ -7470,6 +9228,8 @@ async function renderBackupPage(){
     ["提醒计划",s.reminders],["完成记录",s.reminder_logs],["本机食材",s.foods]
   ];
   box.innerHTML=rows.map(x=>`<div class="backup-summary-item"><span>${x[0]}</span><strong>${x[1]}</strong></div>`).join("");
+
+  renderSyncCenter();
 }
 async function sha256Text(text){
   if(!window.crypto?.subtle)return "";
@@ -7639,12 +9399,28 @@ function initNavigation(){
   document.querySelectorAll(".nav-item").forEach(item=>item.addEventListener("click",function(){
     document.querySelectorAll(".nav-item").forEach(x=>x.classList.remove("active"));this.classList.add("active");document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));
     document.getElementById(`page-${this.dataset.page}`).classList.add("active");pageTitle.textContent=this.dataset.title;
-    if(this.dataset.page==="home")renderHome();if(this.dataset.page==="members")renderMembers();if(this.dataset.page==="health")renderHealthPage();if(this.dataset.page==="diet")requestAnimationFrame(renderDietPage);if(this.dataset.page==="analysis")requestAnimationFrame(renderAnalysisPage);if(this.dataset.page==="reminder")requestAnimationFrame(renderReminderPage);if(this.dataset.page==="backup")requestAnimationFrame(renderBackupPage);
+    if(this.dataset.page==="home")renderHome();if(this.dataset.page==="members")renderMembers();if(this.dataset.page==="health")renderHealthPage();if(this.dataset.page==="diet")requestAnimationFrame(renderDietPage);if(this.dataset.page==="analysis")requestAnimationFrame(renderAnalysisPage);if(this.dataset.page==="reminder")requestAnimationFrame(renderReminderPage);if(this.dataset.page==="backup")requestAnimationFrame(renderBackupPage);if(this.dataset.page==="identity")requestAnimationFrame(renderIdentityPage);
   }));
 }
 function renderCurrentDate(){const d=new Date(),w=["星期日","星期一","星期二","星期三","星期四","星期五","星期六"];currentDate.textContent=`${formatDate(d)} · ${w[d.getDay()]}`}
-function renderAll(){renderHome();renderMembers();renderHealthMemberOptions();renderHealthPage();renderDietMemberOptions();renderDietPage();renderAnalysisMemberOptions();renderReminderMemberOptions()}
-function initApp(){initSampleData();initNavigation();renderCurrentDate();renderAll();dietDateSelect.value=formatDate();initDietHistoryDates();renderDietPage();document.addEventListener("keydown",e=>{if(e.key==="Escape"){closeMemberModal();closeDietModal()}})}
+function renderAll(){renderHome();renderMembers();renderHealthMemberOptions();renderHealthPage();renderDietMemberOptions();renderDietPage();renderAnalysisMemberOptions();renderReminderMemberOptions();renderIdentityTopbar();renderFamilyOverview();renderIdentityFamily()}
+function initAppCore(){
+  if(appCoreInitialized)return;
+  appCoreInitialized=true;
+  initSampleData();
+  initNavigation();
+  renderCurrentDate();
+  renderAll();
+  if(window.dietDateSelect)dietDateSelect.value=formatDate();
+  initDietHistoryDates();
+  renderDietPage();
+  document.addEventListener("keydown",e=>{if(e.key==="Escape"){closeMemberModal();closeDietModal()}});
+}
+async function initApp(){
+  renderCurrentDate();
+  showAuthGate(true);
+  await initializeSupabaseAuth();
+}
 window.addEventListener("resize",()=>{dietCharts.forEach(c=>{if(!c.isDisposed())c.resize()});if(analysisChart&&!analysisChart.isDisposed())analysisChart.resize();[homeHealthChart,homeWeightEnergyChart,homeBpSodiumChart].forEach(c=>{if(c&&!c.isDisposed())c.resize()});});
 document.addEventListener("DOMContentLoaded",initApp);
 
