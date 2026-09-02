@@ -886,8 +886,9 @@
     <button class="nav-item" data-page="backup" data-title="资料与同步"><span class="nav-icon">🛡️</span>资料与同步</button>
   </nav>
   <div class="sidebar-footer">
+    <div id="visibleBuildVersion" style="font-size:10px;color:var(--text-light);margin-bottom:6px">Build 2026.09.02-2110</div>
     <div class="sidebar-footer-title">账号已接入 Supabase</div>
-    <div class="sidebar-footer-text">登录身份与个人资料已连接云端；健康、饮食和提醒数据将在下一阶段逐步迁移。</div>
+    <div class="sidebar-footer-text">账号、家庭、健康、饮食、提醒、菜谱和个人食材已连接 Supabase；公共食材包仍作为可下载缓存保留在本机。</div>
   </div>
 </aside>
 
@@ -1142,7 +1143,7 @@
 </section>
 
 <section class="page" id="page-diet">
-  <div class="page-header"><div><h2>饮食营养</h2><p>记录每日饮食并估算宏量、维生素和矿物质摄入。</p></div></div>
+  <div class="page-header"><div><h2>饮食营养</h2><p>当前登录账号“本人”的饮食记录已连接 Supabase；营养快照会随记录一起保存，其他本地代管档案暂时继续保存在浏览器。</p></div></div>
   <div class="card diet-toolbar">
     <div class="diet-toolbar-left">
       <div class="toolbar-field"><label class="toolbar-label">家庭成员</label><select class="form-control" id="dietMemberSelect" onchange="renderDietPage()"></select></div>
@@ -1490,7 +1491,7 @@
     </div>
     <div class="personal-space-content">
       <div class="page-header identity-page-header">
-        <div><div class="identity-demo-badge">Supabase 账号已连接 · 健康业务数据正在分阶段迁移</div><h2>我的主页</h2><p>管理我的个人身份、公开资料和家庭健康共享权限。</p></div>
+        <div><div class="identity-demo-badge">Supabase 已连接 · 账号与主要资料已云端同步</div><h2>我的主页</h2><p>管理我的个人身份、公开资料和家庭健康共享权限。</p></div>
       </div>
       <div class="identity-tabs" id="identityTabs">
         <button class="identity-tab active" data-identity-tab="me" onclick="switchIdentityTab('me')">我的资料</button>
@@ -1573,7 +1574,7 @@
   <div class="page-header">
     <div>
       <h2>资料与同步</h2>
-      <p>本地备份负责“防丢失”，家庭云同步负责“多设备共享”。当前云同步仍是前端演示，备份恢复功能可实际使用。</p>
+      <p>本地备份负责“防丢失”，Supabase 云同步负责“多设备共享”。账号与主要业务资料已连接 Supabase；本地备份仍可作为额外的离线安全副本。</p>
     </div>
   </div>
 
@@ -1582,7 +1583,7 @@
       <span>💾</span><div><strong>本机资料</strong><small>日常记录优先保存在当前设备，可随时备份和恢复。</small></div>
     </div>
     <div class="data-mode-card cloud">
-      <span>☁️</span><div><strong>家庭云同步</strong><small>未来由你主动点击同步，把允许共享的资料上传并获取家人新资料。</small></div>
+      <span>☁️</span><div><strong>家庭云同步</strong><small>登录后会自动同步主要业务资料；你也可以手动刷新云端状态。</small></div>
     </div>
   </div>
 
@@ -1618,13 +1619,23 @@
     <div class="sync-head">
       <div>
         <div class="card-title">家庭资料同步</div>
-        <div class="card-subtitle">本地优先、手动同步。当前仅展示同步中心和冲突处理逻辑，尚未连接真实后端。</div>
+        <div class="card-subtitle">账号与主要业务资料已经连接 Supabase。页面会在登录时自动同步，也可以在这里手动刷新云端状态。</div>
       </div>
-      <span class="sync-demo-label">待接入云服务</span>
+      <span class="sync-demo-label">Supabase 已连接</span>
     </div>
     <div class="sync-stats" id="syncStats"></div>
     <div class="sync-actions-row">
-      <button class="primary-btn" onclick="simulateManualSync()">模拟一次手动同步</button>
+      <button class="primary-btn" 
+      <div class="card" style="margin-top:16px">
+        <div class="card-title">跨设备测试数据</div>
+        <div class="card-subtitle">一键向当前账号的 Supabase 写入最近 7 天测试数据：每天体重、血压、心率各 1 条，以及早餐、午餐、晚餐各 1 条。用于检查另一台设备上的健康记录、饮食和健康分析是否一致。</div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:14px">
+          <button class="primary-btn" id="seedWeekTestBtn" type="button" onclick="seedWeekCrossDeviceTestData()">生成一周跨设备测试数据</button>
+          <button class="secondary-btn" type="button" onclick="clearWeekCrossDeviceTestData().then(()=>simulateManualSync()).then(()=>alert('测试数据已清除。')).catch(err=>alert('清除失败：'+authErrorText(err)))">清除测试数据</button>
+        </div>
+        <div class="card-subtitle" style="margin-top:10px">测试数据带有专用标记，只会清除由这个按钮生成的数据，不会删除你自己真实录入的记录。</div>
+      </div>
+onclick="simulateManualSync()">立即同步</button>
       <button class="secondary-btn" onclick="showDemoConflict()">预览冲突处理</button>
     </div>
     <div id="syncResultBox" class="sync-result-box"></div>
@@ -2053,7 +2064,7 @@
     <div class="modal-header">
       <div>
         <h3>我的菜谱</h3>
-        <div class="card-subtitle">保存家庭常吃菜的配方模板，后续可直接搜索录入。</div>
+        <div class="card-subtitle">保存家庭常吃菜的配方模板。当前登录账号的个人菜谱会同步到 Supabase，可跨设备继续使用。</div>
       </div>
       <button class="modal-close" onclick="closeCustomDishLibrary()">×</button>
     </div>
@@ -2199,7 +2210,7 @@
 </div>
 
 <script>
-const APP_VERSION="2026.09.02-supabase-reminders-1";
+const APP_VERSION="2026.09.02-build-check-2110";
 
 /* =========================
    Supabase 第一阶段
@@ -2213,6 +2224,89 @@ const SUPABASE_EMAIL_REDIRECT="https://yunizzzz.github.io/familyhealth/";
 const yuniSupabase=window.supabase.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY,{
   auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}
 });
+
+
+const DEVICE_ID_STORAGE_KEY="family_health_device_id";
+const DEVICE_CHECK_INTERVAL_MS=3000;
+let deviceCheckTimer=null;
+let currentDeviceId=null;
+let deviceBeingKicked=false;
+
+function getOrCreateDeviceId(){
+  let id=localStorage.getItem(DEVICE_ID_STORAGE_KEY);
+  if(!id){
+    id=(crypto?.randomUUID?.()||`${Date.now()}-${Math.random()}`).replace(/[^a-f0-9-]/gi,"").slice(0,36);
+    // randomUUID 正常情况下始终会走这里；后备方案保证 localStorage 至少有稳定值。
+    if(!/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(id)){
+      id=crypto.randomUUID();
+    }
+    localStorage.setItem(DEVICE_ID_STORAGE_KEY,id);
+  }
+  return id;
+}
+function currentDeviceSummary(){
+  const ua=navigator.userAgent||"";
+  let browser="浏览器";
+  if(/Edg\//.test(ua))browser="Edge";
+  else if(/Chrome\//.test(ua))browser="Chrome";
+  else if(/Firefox\//.test(ua))browser="Firefox";
+  else if(/Safari\//.test(ua))browser="Safari";
+  const platform=navigator.userAgentData?.platform||navigator.platform||"Web";
+  return {browser,platform,device_name:`${platform} · ${browser}`};
+}
+async function claimCurrentDevice(){
+  if(!currentSupabaseUser)return;
+  currentDeviceId=getOrCreateDeviceId();
+  const info=currentDeviceSummary();
+  const {error}=await yuniSupabase.rpc("claim_active_device",{
+    p_device_id:currentDeviceId,
+    p_device_name:info.device_name,
+    p_platform:info.platform,
+    p_browser:info.browser
+  });
+  if(error)throw error;
+  startDeviceWatch();
+}
+function startDeviceWatch(){
+  stopDeviceWatch();
+  deviceCheckTimer=setInterval(checkCurrentDeviceStillActive,DEVICE_CHECK_INTERVAL_MS);
+}
+function stopDeviceWatch(){
+  if(deviceCheckTimer){clearInterval(deviceCheckTimer);deviceCheckTimer=null}
+}
+window.addEventListener("focus",()=>{ if(currentSupabaseUser) checkCurrentDeviceStillActive(); });
+document.addEventListener("visibilitychange",()=>{ if(!document.hidden&&currentSupabaseUser) checkCurrentDeviceStillActive(); });
+
+async function checkCurrentDeviceStillActive(){
+  if(!currentSupabaseUser||!currentDeviceId||deviceBeingKicked)return;
+  try{
+    const {data,error}=await yuniSupabase.rpc("is_active_device",{p_device_id:currentDeviceId});
+    if(error)throw error;
+    if(data!==true){
+      await kickThisDeviceOut();
+    }
+  }catch(err){
+    console.warn("设备状态检查失败：",err);
+  }
+}
+async function kickThisDeviceOut(){
+  if(deviceBeingKicked)return;
+  deviceBeingKicked=true;
+  stopDeviceWatch();
+  try{
+    // 只清除当前浏览器本地 session，不能把刚登录的新设备也一起登出。
+    await yuniSupabase.auth.signOut({scope:"local"});
+  }catch(err){
+    console.warn("本地退出失败：",err);
+  }
+  currentSupabaseUser=null;
+  currentSupabaseProfile=null;
+  document.getElementById("topbarLogoutBtn")?.style.setProperty("display","none");
+  showAuthGate(true);
+  switchAuthMode("login");
+  showAuthStatus("这个账号已在另一台设备登录，因此当前设备已自动退出。","error");
+  deviceBeingKicked=false;
+}
 
 let currentSupabaseUser=null;
 let currentSupabaseProfile=null;
@@ -2349,6 +2443,92 @@ const HEALTH_DB_TYPE_REVERSE={
 function currentAccountMemberId(){
   return currentSupabaseUser ? `account_${currentSupabaseUser.id}` : "";
 }
+
+const MANAGED_STATE_KEYS=new Set([
+  STORAGE_KEYS.FAMILY_MEMBERS,
+  STORAGE_KEYS.HEALTH_RECORDS,
+  STORAGE_KEYS.DIET_RECORDS,
+  STORAGE_KEYS.REMINDERS,
+  STORAGE_KEYS.REMINDER_LOGS,
+  STORAGE_KEYS.MEDICATION_LOGS,
+  STORAGE_KEYS.STREAK_PROTECTION,
+  STORAGE_KEYS.GLOBAL_CONFIG
+]);
+function shouldSyncManagedStateKey(key){return MANAGED_STATE_KEYS.has(key)}
+function isAccountMemberId(memberId){return String(memberId||"").startsWith("account_")}
+function managedStateSnapshot(){
+  return {
+    managed_members:loadData(STORAGE_KEYS.FAMILY_MEMBERS,[]).filter(m=>!m.account_user_id&&!isAccountMemberId(m.member_id)),
+    managed_health_records:loadData(STORAGE_KEYS.HEALTH_RECORDS,[]).filter(r=>!isAccountMemberId(r.member_id)),
+    managed_diet_records:loadData(STORAGE_KEYS.DIET_RECORDS,[]).filter(r=>!isAccountMemberId(r.member_id)),
+    managed_reminders:loadData(STORAGE_KEYS.REMINDERS,[]).filter(r=>!isAccountMemberId(normalizeReminder(r).member_id)),
+    managed_reminder_logs:loadReminderLogs().filter(r=>!isAccountMemberId(normalizeReminderLog(r).member_id)),
+    managed_medication_logs:loadData(STORAGE_KEYS.MEDICATION_LOGS,[]).filter(r=>!isAccountMemberId(r.member_id)),
+    streak_protection:loadData(STORAGE_KEYS.STREAK_PROTECTION,{family:[],members:{}}),
+    global_config:loadData(STORAGE_KEYS.GLOBAL_CONFIG,{})
+  };
+}
+async function saveManagedAppStateCloud(){
+  if(!currentSupabaseUser)return;
+  const snap=managedStateSnapshot();
+  const {error}=await yuniSupabase
+    .from("user_app_state")
+    .upsert({
+      user_id:currentSupabaseUser.id,
+      ...snap,
+      updated_at:new Date().toISOString()
+    },{onConflict:"user_id"});
+  if(error)throw error;
+}
+async function syncManagedAppStateCloud(){
+  if(!currentSupabaseUser)return;
+  const {data,error}=await yuniSupabase
+    .from("user_app_state")
+    .select("managed_members,managed_health_records,managed_diet_records,managed_reminders,managed_reminder_logs,managed_medication_logs,streak_protection,global_config,updated_at")
+    .eq("user_id",currentSupabaseUser.id)
+    .maybeSingle();
+  if(error)throw error;
+
+  // 首次使用云同步：如果云端尚无状态，则把当前设备上的代管资料上传。
+  if(!data){
+    await saveManagedAppStateCloud();
+    return;
+  }
+
+  suppressManagedStateCloudWrite=true;
+  try{
+    const mergeManaged=(key,cloudRows,memberField="member_id")=>{
+      const local=loadData(key,[]);
+      const accountRows=local.filter(r=>isAccountMemberId(r[memberField]));
+      saveData(key,[...accountRows,...(Array.isArray(cloudRows)?cloudRows:[])]);
+    };
+
+    const localMembers=loadData(STORAGE_KEYS.FAMILY_MEMBERS,[]);
+    const accountMembers=localMembers.filter(m=>m.account_user_id||isAccountMemberId(m.member_id));
+    saveData(STORAGE_KEYS.FAMILY_MEMBERS,[...accountMembers,...(Array.isArray(data.managed_members)?data.managed_members:[])]);
+
+    mergeManaged(STORAGE_KEYS.HEALTH_RECORDS,data.managed_health_records);
+    mergeManaged(STORAGE_KEYS.DIET_RECORDS,data.managed_diet_records);
+
+    const cloudReminders=Array.isArray(data.managed_reminders)?data.managed_reminders:[];
+    const ownAndFamilyReminders=loadData(STORAGE_KEYS.REMINDERS,[]).filter(r=>isAccountMemberId(normalizeReminder(r).member_id));
+    saveData(STORAGE_KEYS.REMINDERS,[...ownAndFamilyReminders,...cloudReminders]);
+
+    const cloudReminderLogs=Array.isArray(data.managed_reminder_logs)?data.managed_reminder_logs:[];
+    const accountReminderLogs=loadReminderLogs().filter(r=>isAccountMemberId(normalizeReminderLog(r).member_id));
+    saveReminderLogs([...accountReminderLogs,...cloudReminderLogs]);
+
+    const cloudMedLogs=Array.isArray(data.managed_medication_logs)?data.managed_medication_logs:[];
+    const accountMedLogs=loadData(STORAGE_KEYS.MEDICATION_LOGS,[]).filter(r=>isAccountMemberId(r.member_id));
+    saveData(STORAGE_KEYS.MEDICATION_LOGS,[...accountMedLogs,...cloudMedLogs]);
+
+    if(data.streak_protection)saveData(STORAGE_KEYS.STREAK_PROTECTION,data.streak_protection);
+    if(data.global_config)saveData(STORAGE_KEYS.GLOBAL_CONFIG,data.global_config);
+  }finally{
+    suppressManagedStateCloudWrite=false;
+  }
+}
+
 function profileGenderText(v){
   if(v===1||v==="1")return "男";
   if(v===2||v==="2")return "女";
@@ -2479,6 +2659,14 @@ async function activateSupabaseUser(user){
   try{
     currentSupabaseUser=user;
     currentSupabaseProfile=await fetchCurrentUserProfile(user.id);
+    try{
+      await claimCurrentDevice();
+    }catch(deviceErr){
+      console.error("单设备登录初始化失败：",deviceErr);
+      showAuthGate(true);
+      showAuthStatus("单设备登录保护没有正常启动："+authErrorText(deviceErr)+"\n\n请先运行最新的单设备登录 SQL，然后刷新页面。","error");
+      throw deviceErr;
+    }
     currentSupabaseProfile=await syncSignupNicknameIfNeeded(user,currentSupabaseProfile);
     AuthService.save(profileToLocalIdentity(user,currentSupabaseProfile));
     ensureCurrentAccountMember();
@@ -2498,6 +2686,26 @@ async function activateSupabaseUser(user){
         await syncReminderCloud();
       }catch(reminderErr){
         console.warn("提醒云同步暂不可用：",reminderErr);
+      }
+      try{
+        await syncDietCloud();
+      }catch(dietErr){
+        console.warn("饮食云同步暂不可用：",dietErr);
+      }
+      try{
+        await syncRecipesCloud();
+      }catch(recipeErr){
+        console.warn("个人菜谱云同步暂不可用：",recipeErr);
+      }
+      try{
+        await syncUserFoodsCloud();
+      }catch(foodErr){
+        console.warn("个人食材云同步暂不可用：",foodErr);
+      }
+      try{
+        await syncManagedAppStateCloud();
+      }catch(stateErr){
+        console.warn("代管资料云同步暂不可用：",stateErr);
       }
     }catch(familyErr){
       console.warn("家庭关系云同步暂不可用：",familyErr);
@@ -2528,6 +2736,7 @@ async function supabaseSignOut(){
   try{
     const {error}=await yuniSupabase.auth.signOut();
     if(error)throw error;
+    stopDeviceWatch();
     currentSupabaseUser=null;currentSupabaseProfile=null;
     document.getElementById("topbarLogoutBtn")?.style.setProperty("display","none");
     showAuthGate(true);switchAuthMode("login");
@@ -2549,6 +2758,7 @@ async function initializeSupabaseAuth(){
     }
     yuniSupabase.auth.onAuthStateChange((event,session)=>{
       if(event==="SIGNED_OUT"){
+        stopDeviceWatch();
         currentSupabaseUser=null;currentSupabaseProfile=null;
         document.getElementById("topbarLogoutBtn")?.style.setProperty("display","none");
         showAuthGate(true);
@@ -2564,7 +2774,15 @@ async function initializeSupabaseAuth(){
 
 const STORAGE_KEYS={FAMILY_MEMBERS:"family_member_list",HEALTH_RECORDS:"health_index_record",DIET_RECORDS:"diet_nutrition_record",CUSTOM_DISHES:"custom_dish_library",REMINDERS:"health_remind_list",REMINDER_LOGS:"health_reminder_logs",MEDICATION_LOGS:"medication_execution_logs",STREAK_PROTECTION:"health_streak_protection",ONLINE_FOOD_PACKS:"online_food_pack_state",IDENTITY:"yuni_identity_demo",FAMILY_RELATIONS:"yuni_family_relations_demo",FAMILY_INVITES:"yuni_family_invites_demo",SHARE_PERMISSIONS:"yuni_share_permissions_demo",SYNC_META:"yuni_sync_meta_demo",GLOBAL_CONFIG:"health_global_config"};
 function loadData(key,def=[]){try{const v=localStorage.getItem(key);return v===null?def:JSON.parse(v)}catch(e){return def}}
-function saveData(key,data){localStorage.setItem(key,JSON.stringify(data))}
+let suppressManagedStateCloudWrite=false;
+let managedStateSaveTimer=null;
+function saveData(key,data){
+  localStorage.setItem(key,JSON.stringify(data));
+  if(!suppressManagedStateCloudWrite && currentSupabaseUser && shouldSyncManagedStateKey(key)){
+    clearTimeout(managedStateSaveTimer);
+    managedStateSaveTimer=setTimeout(()=>saveManagedAppStateCloud().catch(err=>console.warn("代管资料云同步失败：",err)),450);
+  }
+}
 function formatDate(d=new Date()){return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`}
 function getCurrentTime(){const d=new Date();return `${String(d.getHours()).padStart(2,"0")}:${String(d.getMinutes()).padStart(2,"0")}`}
 function generateId(p){return `${p}_${Date.now()}_${Math.random().toString(36).slice(2,8)}`}
@@ -4127,6 +4345,50 @@ function switchIdentityTab(tab){
   if(tab==="public")renderIdentityPublicSettings();
   if(tab==="permissions")renderPermissionGroups();
 }
+
+async function editAccountNickname(){
+  if(!currentSupabaseUser){alert("请先登录。");return}
+  const identity=AuthService.current();
+  const oldName=identity.nickname||"";
+  const value=prompt("请输入新的昵称：",oldName);
+  if(value===null)return;
+  const nickname=value.trim();
+  if(!nickname){alert("昵称不能为空。");return}
+  if(nickname.length>30){alert("昵称最多 30 个字符。");return}
+
+  try{
+    const {data,error}=await yuniSupabase
+      .from("user_profile")
+      .update({nickname,updated_at:new Date().toISOString()})
+      .eq("user_id",currentSupabaseUser.id)
+      .select("user_id,health_id,nickname,avatar_path,bio,region,gender,birth_date,height_cm,show_region,show_age_band,show_gender,created_at,updated_at")
+      .single();
+    if(error)throw error;
+
+    // 同时把昵称写入 Auth metadata，之后重新注册/迁移也能保留。
+    const authUpdate=await yuniSupabase.auth.updateUser({data:{nickname}});
+    if(authUpdate.error)console.warn("Auth metadata 昵称更新失败：",authUpdate.error);
+
+    currentSupabaseProfile=data;
+    const updated=profileToLocalIdentity(currentSupabaseUser,currentSupabaseProfile);
+    AuthService.save(updated);
+
+    // 当前账号对应的“本人”卡片也马上更新。
+    ensureCurrentAccountMember();
+    try{await syncFamilyCloud()}catch(e){console.warn(e)}
+
+    renderIdentityTopbar();
+    renderIdentityPage();
+    renderMembers();
+    renderFamilyOverview();
+    renderHome();
+    alert("昵称已修改。");
+  }catch(err){
+    console.error(err);
+    alert("修改昵称失败："+authErrorText(err));
+  }
+}
+
 function renderIdentityPage(){
   renderIdentityTopbar();
   const identity=AuthService.current(),member=identityBoundMember();
@@ -4139,6 +4401,10 @@ function renderIdentityPage(){
       <div class="account-bind-badge ${member?"":"unbound"}">${member?"✓ 已绑定健康档案":"尚未绑定现有健康档案"}</div></div>
     </div>
     <div class="identity-bio">${escapeHtml(identity.bio||"还没有填写个人简介。")}</div>
+    <div class="identity-profile-actions">
+      <button class="primary-btn" type="button" onclick="editAccountNickname()">修改昵称</button>
+      <button class="secondary-btn" type="button" onclick="switchIdentityTab('public')">编辑公开资料</button>
+    </div>
     `;
   }
   const summary=document.getElementById("identityHealthSummary");
@@ -4618,13 +4884,247 @@ function renderSyncCenter(){
   const last=s.last_sync?new Date(s.last_sync).toLocaleString():"尚未同步";
   box.innerHTML=`<div class="sync-stat"><span>本机待同步</span><strong>${Number(s.pending_local||0)} 条</strong></div><div class="sync-stat"><span>上次同步</span><strong style="font-size:11px">${escapeHtml(last)}</strong></div><div class="sync-stat"><span>当前模式</span><strong style="font-size:11px">本地演示</strong></div>`;
   const result=document.getElementById("syncResultBox");
-  if(result&&!s.last_result)result.innerHTML='<div class="card-subtitle">当前没有真实云端连接，点击“模拟一次手动同步”只演示状态，不会上传健康资料。</div>';
+  if(result&&!s.last_result)result.innerHTML='<div class="card-subtitle">当前没有真实云端连接，点击“立即同步”只演示状态，不会上传健康资料。</div>';
 }
+
+const WEEK_TEST_TAG="cross_device_week_test_v1";
+
+function ymdLocal(d){
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
+}
+function addLocalDays(base,delta){
+  const d=new Date(base.getFullYear(),base.getMonth(),base.getDate());
+  d.setDate(d.getDate()+delta);
+  return d;
+}
+function weekTestDates(){
+  const today=new Date();
+  return Array.from({length:7},(_,i)=>ymdLocal(addLocalDays(today,i-6)));
+}
+function weekTestHealthRows(){
+  const dates=weekTestDates();
+  const weights=[68.4,68.2,68.3,68.0,67.9,67.8,67.7];
+  const bp=[[138,88],[136,86],[135,85],[133,84],[132,83],[130,82],[128,81]];
+  const hr=[76,74,75,72,73,71,70];
+  const rows=[];
+  dates.forEach((date,i)=>{
+    rows.push({
+      user_id:currentSupabaseUser.id,type:2,record_date:date,record_time:"07:30",
+      weight_kg:weights[i],note:`${WEEK_TEST_TAG}|weight|${i+1}`
+    });
+    rows.push({
+      user_id:currentSupabaseUser.id,type:4,record_date:date,record_time:"08:00",
+      systolic:bp[i][0],diastolic:bp[i][1],note:`${WEEK_TEST_TAG}|bp|${i+1}`
+    });
+    rows.push({
+      user_id:currentSupabaseUser.id,type:6,record_date:date,record_time:"08:05",
+      heart_rate:hr[i],note:`${WEEK_TEST_TAG}|hr|${i+1}`
+    });
+  });
+  return rows;
+}
+function weekTestMealsForDay(index){
+  const breakfast=[
+    ["燕麦牛奶早餐",420,18,13,58,8],
+    ["鸡蛋全麦早餐",390,21,14,43,6],
+    ["酸奶水果燕麦",405,19,11,55,7],
+    ["豆浆鸡蛋早餐",375,22,12,39,5],
+    ["牛奶香蕉燕麦",430,18,12,63,8],
+    ["全麦吐司鸡蛋",400,23,15,42,6],
+    ["燕麦坚果酸奶",445,20,16,57,8]
+  ][index];
+  const lunch=[
+    ["鸡胸肉杂粮饭",610,42,16,72,10],
+    ["清蒸鱼糙米饭",590,39,15,69,9],
+    ["番茄牛肉杂粮饭",640,41,20,71,8],
+    ["鸡腿蔬菜饭",620,38,19,73,9],
+    ["虾仁藜麦饭",575,36,14,68,10],
+    ["牛肉蔬菜面",650,40,18,80,7],
+    ["鸡胸肉荞麦面",605,43,15,70,9]
+  ][index];
+  const dinner=[
+    ["豆腐蔬菜汤配米饭",480,25,14,61,9],
+    ["清炒时蔬配鸡蛋",455,24,16,48,8],
+    ["三文鱼蔬菜晚餐",520,33,21,43,7],
+    ["菌菇豆腐晚餐",465,26,13,57,10],
+    ["鸡胸肉沙拉配玉米",490,37,15,49,9],
+    ["番茄鸡蛋面",505,26,14,67,6],
+    ["清蒸鱼蔬菜晚餐",475,34,13,50,8]
+  ][index];
+  return [
+    {meal_type:1,name:breakfast[0],calories:breakfast[1],protein:breakfast[2],fat:breakfast[3],carb:breakfast[4],fiber:breakfast[5],amount_g:320},
+    {meal_type:2,name:lunch[0],calories:lunch[1],protein:lunch[2],fat:lunch[3],carb:lunch[4],fiber:lunch[5],amount_g:480},
+    {meal_type:3,name:dinner[0],calories:dinner[1],protein:dinner[2],fat:dinner[3],carb:dinner[4],fiber:dinner[5],amount_g:420}
+  ];
+}
+
+async function clearWeekCrossDeviceTestData(){
+  if(!currentSupabaseUser)return;
+  const {data:healthRows,error:hqErr}=await yuniSupabase
+    .from("health_measurements")
+    .select("id,note")
+    .eq("user_id",currentSupabaseUser.id)
+    .like("note",`${WEEK_TEST_TAG}%`);
+  if(hqErr)throw hqErr;
+  const healthIds=(healthRows||[]).map(x=>x.id);
+  if(healthIds.length){
+    const {error}=await yuniSupabase.from("health_measurements").delete().in("id",healthIds);
+    if(error)throw error;
+  }
+
+  const {data:dietItems,error:diErr}=await yuniSupabase
+    .from("diet_log_items")
+    .select("id,diet_log_id,entry_metadata")
+    .eq("user_id",currentSupabaseUser.id);
+  if(diErr)throw diErr;
+  const testItems=(dietItems||[]).filter(x=>safeJsonValue(x.entry_metadata)?.test_seed===WEEK_TEST_TAG);
+  if(testItems.length){
+    const {error}=await yuniSupabase.from("diet_log_items").delete().in("id",testItems.map(x=>x.id));
+    if(error)throw error;
+  }
+
+  // 删除已经没有任何 item 的空 diet_logs（只处理本周测试日期）
+  const dates=weekTestDates();
+  for(const date of dates){
+    const {data:logs,error}=await yuniSupabase
+      .from("diet_logs")
+      .select("id")
+      .eq("user_id",currentSupabaseUser.id)
+      .eq("log_date",date);
+    if(error)throw error;
+    for(const log of (logs||[])){
+      const {count,error:countErr}=await yuniSupabase
+        .from("diet_log_items")
+        .select("id",{count:"exact",head:true})
+        .eq("diet_log_id",log.id);
+      if(countErr)throw countErr;
+      if(Number(count||0)===0){
+        const {error:delErr}=await yuniSupabase
+          .from("diet_logs").delete()
+          .eq("id",log.id)
+          .eq("user_id",currentSupabaseUser.id);
+        if(delErr)throw delErr;
+      }
+    }
+  }
+}
+
+async function seedWeekCrossDeviceTestData(){
+  if(!currentSupabaseUser){alert("请先登录。");return}
+  if(!confirm("将为当前账号写入最近 7 天的测试健康数据和饮食数据。\n\n这些数据会保存到 Supabase，用于跨设备测试。继续吗？"))return;
+
+  const btn=document.getElementById("seedWeekTestBtn");
+  if(btn){btn.disabled=true;btn.textContent="正在生成测试数据…";}
+
+  try{
+    await clearWeekCrossDeviceTestData();
+
+    // 健康：7天 × 3条（体重、血压、心率）
+    const healthRows=weekTestHealthRows();
+    const {error:healthErr}=await yuniSupabase.from("health_measurements").insert(healthRows);
+    if(healthErr)throw healthErr;
+
+    // 饮食：7天 × 3餐
+    const dates=weekTestDates();
+    for(let i=0;i<dates.length;i++){
+      for(const meal of weekTestMealsForDay(i)){
+        const {data:log,error:logErr}=await yuniSupabase
+          .from("diet_logs")
+          .upsert({
+            user_id:currentSupabaseUser.id,
+            log_date:dates[i],
+            meal_type:meal.meal_type,
+            updated_at:new Date().toISOString()
+          },{onConflict:"user_id,log_date,meal_type"})
+          .select("id")
+          .single();
+        if(logErr)throw logErr;
+
+        const {error:itemErr}=await yuniSupabase.from("diet_log_items").insert({
+          diet_log_id:log.id,
+          user_id:currentSupabaseUser.id,
+          food_source:3,
+          food_ref_id:null,
+          food_name_snapshot:meal.name,
+          amount_g:meal.amount_g,
+          quantity:1,
+          calories:meal.calories,
+          protein:meal.protein,
+          fat:meal.fat,
+          carb:meal.carb,
+          fiber:meal.fiber,
+          nutrition_snapshot:{
+            total_calorie:meal.calories,
+            total_protein:meal.protein,
+            total_fat:meal.fat,
+            total_carb:meal.carb,
+            total_fiber:meal.fiber,
+            micro:{},
+            total_vitamin:{},
+            partial_nutrition:false
+          },
+          entry_metadata:{
+            test_seed:WEEK_TEST_TAG,
+            frontend_record:{
+              diet_date:dates[i],
+              diet_period:DIET_MEAL_FROM_DB[meal.meal_type]||"snack",
+              diet_type:"custom",
+              custom_dish_name:meal.name,
+              mix_dish_name:meal.name,
+              quantity:1,
+              estimated_total_weight:meal.amount_g,
+              total_calorie:meal.calories,
+              total_protein:meal.protein,
+              total_fat:meal.fat,
+              total_carb:meal.carb,
+              total_fiber:meal.fiber,
+              partial_nutrition:false,
+              food_list:[]
+            }
+          }
+        });
+        if(itemErr)throw itemErr;
+      }
+    }
+
+    await syncHealthMeasurementsFromSupabase();
+    await syncDietCloud();
+    renderHome();
+    renderHealthPage();
+    renderDietPage();
+    renderAnalysisPage();
+
+    const datesLabel=`${dates[0]} ～ ${dates[dates.length-1]}`;
+    alert(`一周跨设备测试数据已写入 Supabase。\n\n日期：${datesLabel}\n健康记录：21 条\n饮食记录：21 条\n\n现在可以换另一台设备登录同一账号检查。`);
+  }catch(err){
+    console.error("生成一周测试数据失败：",err);
+    alert("生成测试数据失败："+authErrorText(err));
+  }finally{
+    if(btn){btn.disabled=false;btn.textContent="生成一周跨设备测试数据";}
+  }
+}
+
 async function simulateManualSync(){
-  const r=await SyncService.sync();
   const box=document.getElementById("syncResultBox");
-  if(box)box.innerHTML=`<div class="sync-result"><strong>演示同步完成</strong><br>↑ 上传 ${r.uploaded} 条　↓ 获取 ${r.downloaded} 条　✓ 自动合并 ${r.merged} 条　⚠ 冲突 ${r.conflicts} 条<br><span style="color:var(--text-light)">当前没有连接真实后端，因此不会产生真实网络传输。</span></div>`;
-  renderSyncCenter();
+  if(box)box.innerHTML='<div class="sync-result">正在同步账号、家庭、健康、饮食、提醒、菜谱、个人食材和代管档案…</div>';
+  try{
+    await syncFamilyCloud();
+    await syncSharePermissionsCloud();
+    await syncHealthMeasurementsFromSupabase();
+    await syncReminderCloud();
+    await syncDietCloud();
+    await syncRecipesCloud();
+    await syncUserFoodsCloud();
+    await syncManagedAppStateCloud();
+
+    const meta={last_sync:new Date().toISOString(),pending_local:0,last_result:"success"};
+    localStorage.setItem(STORAGE_KEYS.SYNC_META,JSON.stringify(meta));
+    renderAll();
+    if(box)box.innerHTML=`<div class="sync-result"><strong>同步完成</strong><br>${new Date().toLocaleString()}<br>账号与主要业务资料均已与 Supabase 对齐。</div>`;
+  }catch(err){
+    console.error("手动同步失败：",err);
+    if(box)box.innerHTML=`<div class="sync-result" style="color:var(--danger)">同步失败：${escapeHtml(authErrorText(err))}</div>`;
+  }
 }
 function showDemoConflict(){
   const box=document.getElementById("syncConflictBody");
@@ -5607,6 +6107,72 @@ let pendingFoodImport=[];
 function normalizeFoodName(value){return normalizeText(String(value||"").trim())}
 function makeIndexedFoodId(name){return `uf_${normalizeFoodName(name).replace(/\s+/g,"_")}_${Math.random().toString(36).slice(2,7)}`}
 
+
+let suppressUserFoodCloudWrite=false;
+
+function userFoodDbPayload(food){
+  return {
+    user_id:currentSupabaseUser.id,
+    local_id:String(food.id||""),
+    name:String(food.name||"未命名食材"),
+    normalized_name:String(food.normalized_name||normalizeFoodName(food.name||"")),
+    category:String(food.category||"other"),
+    source_type:String(food.source_type||food.source||"user"),
+    source_note:String(food.source_note||food.source_name||""),
+    aliases:Array.isArray(food.aliases)?food.aliases:[],
+    nutrition:food.nutrition_per_100g||{},
+    raw_payload:food,
+    updated_at:new Date().toISOString()
+  };
+}
+async function saveUserFoodCloud(food){
+  if(!currentSupabaseUser||suppressUserFoodCloudWrite)return;
+  const payload=userFoodDbPayload(food);
+  const {error}=await yuniSupabase
+    .from("user_foods")
+    .upsert(payload,{onConflict:"user_id,local_id"});
+  if(error)throw error;
+}
+async function deleteUserFoodCloud(localId){
+  if(!currentSupabaseUser||suppressUserFoodCloudWrite)return;
+  const {error}=await yuniSupabase
+    .from("user_foods")
+    .delete()
+    .eq("user_id",currentSupabaseUser.id)
+    .eq("local_id",String(localId));
+  if(error)throw error;
+}
+async function syncUserFoodsCloud(){
+  if(!currentSupabaseUser)return;
+  const {data,error}=await yuniSupabase
+    .from("user_foods")
+    .select("local_id,raw_payload,updated_at")
+    .eq("user_id",currentSupabaseUser.id)
+    .order("updated_at",{ascending:true});
+  if(error)throw error;
+
+  suppressUserFoodCloudWrite=true;
+  try{
+    for(const row of (data||[])){
+      const food=row.raw_payload||{};
+      if(!food.id)food.id=row.local_id;
+      await withFoodStore("readwrite",store=>store.put(food));
+    }
+  }finally{
+    suppressUserFoodCloudWrite=false;
+  }
+
+  // 首次接入时，把这台设备已有的个人食材也补到云端。
+  const localFoods=await getAllIndexedFoods();
+  const cloudIds=new Set((data||[]).map(x=>String(x.local_id)));
+  for(const food of localFoods){
+    if(!cloudIds.has(String(food.id))){
+      try{await saveUserFoodCloud(food)}
+      catch(err){console.warn("个人食材首次上云失败：",food?.name,err)}
+    }
+  }
+}
+
 function openFoodDatabase(){
   if(foodDbPromise)return foodDbPromise;
   foodDbPromise=new Promise((resolve,reject)=>{
@@ -5655,10 +6221,19 @@ async function getFoodByAnyId(id){
   return await getIndexedFoodById(id);
 }
 async function saveIndexedFood(food){
-  return withFoodStore("readwrite",store=>store.put(food));
+  await withFoodStore("readwrite",store=>store.put(food));
+  if(currentSupabaseUser&&!suppressUserFoodCloudWrite){
+    try{await saveUserFoodCloud(food)}
+    catch(err){console.warn("个人食材云端保存失败：",err)}
+  }
+  return food;
 }
 async function deleteIndexedFood(id){
-  return withFoodStore("readwrite",store=>store.delete(id));
+  await withFoodStore("readwrite",store=>store.delete(id));
+  if(currentSupabaseUser&&!suppressUserFoodCloudWrite){
+    try{await deleteUserFoodCloud(id)}
+    catch(err){console.warn("个人食材云端删除失败：",err)}
+  }
 }
 async function getAllIndexedFoods(){
   if(!foodDbAvailable)return [];
@@ -6066,6 +6641,153 @@ function downloadFoodImportTemplate(){
   triggerJsonDownload("food_import_template.json",sample);
 }
 
+
+function recipeSourceToDb(sourceType){
+  if(sourceType==="food"||sourceType==="indexed_food"||sourceType==="custom_recognized")return 1;
+  if(sourceType==="dish"||sourceType==="custom_dish")return 2;
+  return 3;
+}
+function recipeMetadataFromLocal(dish){
+  return {
+    aliases:Array.isArray(dish.aliases)?dish.aliases:[],
+    default_serving_g:Number(dish.default_serving_g||dish.total_weight_g||0),
+    use_count:Number(dish.use_count||0),
+    last_used_at:dish.last_used_at||""
+  };
+}
+function recipeIngredientMetadataFromLocal(i){
+  return {
+    source_type:i.source_type||"",
+    nutrition_snapshot_per_100g:i.nutrition_snapshot_per_100g||null
+  };
+}
+function dbRecipeToLocal(row){
+  const meta=safeJsonValue(row.recipe_metadata);
+  const ingredients=(row.recipe_ingredients||[])
+    .slice()
+    .sort((a,b)=>Number(a.sort_order||0)-Number(b.sort_order||0))
+    .map(i=>{
+      const im=safeJsonValue(i.ingredient_metadata);
+      return {
+        recipe_id:i.id,
+        food_id:i.food_ref_id||"",
+        food_name:i.food_name_snapshot||"",
+        weight_g:Number(i.amount_g||0),
+        source_type:im.source_type||"",
+        nutrition_snapshot_per_100g:im.nutrition_snapshot_per_100g||null
+      };
+    });
+
+  return {
+    custom_dish_id:row.id,
+    name:row.name||"未命名菜谱",
+    aliases:Array.isArray(meta.aliases)?meta.aliases:[],
+    default_serving_g:Number(meta.default_serving_g??row.total_weight_g??0),
+    ingredients,
+    use_count:Number(meta.use_count||0),
+    last_used_at:meta.last_used_at||"",
+    created_at:row.created_at||"",
+    updated_at:row.updated_at||"",
+    cloud:true
+  };
+}
+async function syncRecipesCloud(){
+  if(!currentSupabaseUser)return;
+  const {data,error}=await yuniSupabase
+    .from("recipes")
+    .select("id,user_id,name,description,servings,total_weight_g,recipe_metadata,created_at,updated_at,deleted_at,recipe_ingredients(id,recipe_id,food_source,food_ref_id,food_name_snapshot,amount_g,sort_order,ingredient_metadata)")
+    .eq("user_id",currentSupabaseUser.id)
+    .is("deleted_at",null)
+    .order("updated_at",{ascending:false});
+  if(error)throw error;
+  saveCustomDishes((data||[]).map(dbRecipeToLocal));
+}
+async function saveRecipeCloud(record){
+  if(!currentSupabaseUser)throw new Error("请先登录");
+  const isExisting=Boolean(record.cloud && record.custom_dish_id);
+
+  let recipe;
+  if(isExisting){
+    const {data,error}=await yuniSupabase
+      .from("recipes")
+      .update({
+        name:record.name,
+        description:null,
+        servings:1,
+        total_weight_g:Number(record.default_serving_g||0),
+        recipe_metadata:recipeMetadataFromLocal(record),
+        updated_at:new Date().toISOString()
+      })
+      .eq("id",record.custom_dish_id)
+      .eq("user_id",currentSupabaseUser.id)
+      .select("id")
+      .single();
+    if(error)throw error;
+    recipe=data;
+
+    const del=await yuniSupabase.from("recipe_ingredients").delete().eq("recipe_id",recipe.id);
+    if(del.error)throw del.error;
+  }else{
+    const {data,error}=await yuniSupabase
+      .from("recipes")
+      .insert({
+        user_id:currentSupabaseUser.id,
+        name:record.name,
+        description:null,
+        servings:1,
+        total_weight_g:Number(record.default_serving_g||0),
+        recipe_metadata:recipeMetadataFromLocal(record)
+      })
+      .select("id")
+      .single();
+    if(error)throw error;
+    recipe=data;
+  }
+
+  const ingredients=(record.ingredients||[]).map((i,index)=>({
+    recipe_id:recipe.id,
+    food_source:recipeSourceToDb(i.source_type),
+    food_ref_id:String(i.food_id||`custom_${index+1}`),
+    food_name_snapshot:i.food_name||"未命名食材",
+    amount_g:Number(i.weight_g||0),
+    sort_order:index,
+    ingredient_metadata:recipeIngredientMetadataFromLocal(i)
+  }));
+
+  if(ingredients.length){
+    const ins=await yuniSupabase.from("recipe_ingredients").insert(ingredients);
+    if(ins.error)throw ins.error;
+  }
+
+  await syncRecipesCloud();
+  return recipe.id;
+}
+async function deleteRecipeCloud(id){
+  if(!currentSupabaseUser)throw new Error("请先登录");
+  const {error}=await yuniSupabase
+    .from("recipes")
+    .update({deleted_at:new Date().toISOString(),updated_at:new Date().toISOString()})
+    .eq("id",id)
+    .eq("user_id",currentSupabaseUser.id);
+  if(error)throw error;
+  await syncRecipesCloud();
+}
+async function updateRecipeUsageCloud(id,usedAt){
+  if(!currentSupabaseUser||!id)return;
+  const dish=findCustomDishById(id);
+  if(!dish?.cloud)return;
+  const next={...dish,use_count:Number(dish.use_count||0)+1,last_used_at:usedAt};
+  const {error}=await yuniSupabase
+    .from("recipes")
+    .update({
+      recipe_metadata:recipeMetadataFromLocal(next),
+      updated_at:new Date().toISOString()
+    })
+    .eq("id",id)
+    .eq("user_id",currentSupabaseUser.id);
+  if(error)throw error;
+}
+
 function loadCustomDishes(){return loadData(STORAGE_KEYS.CUSTOM_DISHES,[])}
 function saveCustomDishes(data){saveData(STORAGE_KEYS.CUSTOM_DISHES,data)}
 function findCustomDishById(id){return loadCustomDishes().find(x=>x.custom_dish_id===id)||null}
@@ -6391,6 +7113,207 @@ function renderCustomIngredientList(){
   customIngredientList.innerHTML=customIngredients.map(i=>`<div class="custom-ingredient-row"><div class="${i.recognized?"":"unrecognized"}">${escapeHtml(i.name)} ${i.recognized?"":"· 未识别，营养不计入"}</div><div>${i.weight_g}g</div><div><button type="button" class="small-danger-btn" onclick="removeCustomIngredient('${i.custom_id}')">删除</button></div></div>`).join("");
 }
 
+
+const DIET_MEAL_TO_DB={breakfast:1,lunch:2,dinner:3,snack:4};
+const DIET_MEAL_FROM_DB={1:"breakfast",2:"lunch",3:"dinner",4:"snack"};
+
+function dietFoodSourceToDb(rec){
+  if(rec.diet_type==="single")return 1;
+  if(rec.diet_type==="mix")return 2;
+  return 3;
+}
+function dietDisplayNameFromRec(rec){
+  return rec.food_name||rec.mix_dish_name||rec.custom_dish_name||dietDisplayName(rec)||"饮食记录";
+}
+function dietNutritionSnapshot(rec){
+  return {
+    total_calorie:Number(rec.total_calorie||0),
+    total_protein:Number(rec.total_protein||0),
+    total_fat:Number(rec.total_fat||0),
+    total_carb:Number(rec.total_carb||0),
+    total_fiber:Number(rec.total_fiber||0),
+    micro:rec.micro||rec.total_mineral||{},
+    total_vitamin:rec.total_vitamin||{},
+    partial_nutrition:Boolean(rec.partial_nutrition)
+  };
+}
+function dietEntryMetadata(rec){
+  const copy=JSON.parse(JSON.stringify(rec));
+  delete copy.cloud;
+  delete copy.cloud_diet_log_id;
+  return {frontend_record:copy};
+}
+function dbDietItemToLocal(item,log){
+  const meta=safeJsonValue(item.entry_metadata);
+  const snap=safeJsonValue(item.nutrition_snapshot);
+
+  if(meta.frontend_record){
+    const r=meta.frontend_record;
+    return {
+      ...r,
+      diet_id:item.id,
+      member_id:currentAccountMemberId(),
+      diet_date:log.log_date||r.diet_date||"",
+      diet_period:DIET_MEAL_FROM_DB[Number(log.meal_type)]||r.diet_period||"snack",
+      total_calorie:item.calories??r.total_calorie??0,
+      total_protein:item.protein??r.total_protein??0,
+      total_fat:item.fat??r.total_fat??0,
+      total_carb:item.carb??r.total_carb??0,
+      total_fiber:item.fiber??r.total_fiber??0,
+      micro:snap.micro||r.micro||r.total_mineral||{},
+      total_vitamin:snap.total_vitamin||r.total_vitamin||{},
+      partial_nutrition:Boolean(snap.partial_nutrition??r.partial_nutrition),
+      estimated_total_weight:Number(item.amount_g??r.estimated_total_weight??0),
+      quantity:Number(item.quantity??r.quantity??1),
+      cloud:true,
+      cloud_diet_log_id:log.id
+    };
+  }
+
+  return {
+    diet_id:item.id,
+    member_id:currentAccountMemberId(),
+    diet_date:log.log_date||"",
+    diet_period:DIET_MEAL_FROM_DB[Number(log.meal_type)]||"snack",
+    diet_type:Number(item.food_source)===1?"single":Number(item.food_source)===2?"mix":"custom",
+    dish_id:"",
+    custom_dish_id:"",
+    mix_dish_name:Number(item.food_source)===1?"":item.food_name_snapshot,
+    food_name:Number(item.food_source)===1?item.food_name_snapshot:"",
+    quantity:Number(item.quantity||1),
+    portions:[{weight_g:Number(item.amount_g||0),serving_unit:"g",serving_quantity:Number(item.quantity||1)}],
+    estimated_total_weight:Number(item.amount_g||0),
+    serving_unit:"g",
+    serving_quantity:Number(item.quantity||1),
+    food_list:[{
+      food_id:item.food_ref_id||"",
+      food_name:item.food_name_snapshot||"饮食记录",
+      std_weight:Number(item.amount_g||0),
+      source_type:"cloud"
+    }],
+    partial_nutrition:Boolean(snap.partial_nutrition),
+    total_calorie:Number(item.calories||0),
+    total_protein:Number(item.protein||0),
+    total_fat:Number(item.fat||0),
+    total_carb:Number(item.carb||0),
+    total_fiber:Number(item.fiber||0),
+    micro:snap.micro||{},
+    total_vitamin:snap.total_vitamin||{},
+    create_date:(item.created_at||"").slice(0,10),
+    record_time:(item.created_at||"").slice(11,16),
+    created_at:item.created_at||"",
+    cloud:true,
+    cloud_diet_log_id:log.id
+  };
+}
+async function syncDietCloud(){
+  if(!currentSupabaseUser)return;
+  const ownId=currentAccountMemberId();
+
+  const {data:logs,error:logsError}=await yuniSupabase
+    .from("diet_logs")
+    .select("id,user_id,log_date,meal_type,created_at,updated_at,diet_log_items(id,diet_log_id,user_id,food_source,food_ref_id,food_name_snapshot,amount_g,quantity,calories,protein,fat,carb,fiber,nutrition_snapshot,entry_metadata,created_at,updated_at)")
+    .eq("user_id",currentSupabaseUser.id)
+    .order("log_date",{ascending:false});
+  if(logsError)throw logsError;
+
+  const cloudRows=[];
+  (logs||[]).forEach(log=>{
+    (log.diet_log_items||[]).forEach(item=>{
+      cloudRows.push(dbDietItemToLocal(item,log));
+    });
+  });
+
+  const existing=loadData(STORAGE_KEYS.DIET_RECORDS,[]);
+  const other=existing.filter(r=>r.member_id!==ownId);
+  saveData(STORAGE_KEYS.DIET_RECORDS,[...other,...cloudRows]);
+}
+async function ensureDietLogCloud(rec){
+  const mealType=DIET_MEAL_TO_DB[rec.diet_period]||4;
+  const payload={
+    user_id:currentSupabaseUser.id,
+    log_date:rec.diet_date,
+    meal_type:mealType,
+    updated_at:new Date().toISOString()
+  };
+
+  const {data,error}=await yuniSupabase
+    .from("diet_logs")
+    .upsert(payload,{onConflict:"user_id,log_date,meal_type"})
+    .select("id,user_id,log_date,meal_type")
+    .single();
+
+  if(error)throw error;
+  return data;
+}
+async function insertDietRecordCloud(rec){
+  const log=await ensureDietLogCloud(rec);
+  const firstFood=(rec.food_list||[])[0]||{};
+  const {error}=await yuniSupabase.from("diet_log_items").insert({
+    diet_log_id:log.id,
+    user_id:currentSupabaseUser.id,
+    food_source:dietFoodSourceToDb(rec),
+    food_ref_id:firstFood.food_id||rec.dish_id||rec.custom_dish_id||null,
+    food_name_snapshot:dietDisplayNameFromRec(rec),
+    amount_g:Number(rec.estimated_total_weight||0),
+    quantity:Number(rec.quantity||1),
+    calories:Number(rec.total_calorie||0),
+    protein:Number(rec.total_protein||0),
+    fat:Number(rec.total_fat||0),
+    carb:Number(rec.total_carb||0),
+    fiber:Number(rec.total_fiber||0),
+    nutrition_snapshot:dietNutritionSnapshot(rec),
+    entry_metadata:dietEntryMetadata(rec)
+  });
+  if(error)throw error;
+}
+async function updateDietRecordCloud(rec){
+  const {error}=await yuniSupabase
+    .from("diet_log_items")
+    .update({
+      food_source:dietFoodSourceToDb(rec),
+      food_ref_id:(rec.food_list||[])[0]?.food_id||rec.dish_id||rec.custom_dish_id||null,
+      food_name_snapshot:dietDisplayNameFromRec(rec),
+      amount_g:Number(rec.estimated_total_weight||0),
+      quantity:Number(rec.quantity||1),
+      calories:Number(rec.total_calorie||0),
+      protein:Number(rec.total_protein||0),
+      fat:Number(rec.total_fat||0),
+      carb:Number(rec.total_carb||0),
+      fiber:Number(rec.total_fiber||0),
+      nutrition_snapshot:dietNutritionSnapshot(rec),
+      entry_metadata:dietEntryMetadata(rec),
+      updated_at:new Date().toISOString()
+    })
+    .eq("id",rec.diet_id)
+    .eq("user_id",currentSupabaseUser.id);
+  if(error)throw error;
+}
+async function deleteDietRecordCloud(rec){
+  const {error}=await yuniSupabase
+    .from("diet_log_items")
+    .delete()
+    .eq("id",rec.diet_id)
+    .eq("user_id",currentSupabaseUser.id);
+  if(error)throw error;
+
+  if(rec.cloud_diet_log_id){
+    const {count,error:countError}=await yuniSupabase
+      .from("diet_log_items")
+      .select("id",{count:"exact",head:true})
+      .eq("diet_log_id",rec.cloud_diet_log_id);
+    if(countError)throw countError;
+    if(Number(count||0)===0){
+      const {error:logDeleteError}=await yuniSupabase
+        .from("diet_logs")
+        .delete()
+        .eq("id",rec.cloud_diet_log_id)
+        .eq("user_id",currentSupabaseUser.id);
+      if(logDeleteError)throw logDeleteError;
+    }
+  }
+}
+
 async function submitDietRecord(e){
   e.preventDefault();
   dietFormError.textContent="";
@@ -6437,7 +7360,7 @@ async function submitDietRecord(e){
     });
 
     if(document.getElementById("saveCustomDishToLibrary")?.checked){
-      const saveResult=saveCustomDishFromDietBuilder(name,weight,foods);
+      const saveResult=await saveCustomDishFromDietBuilder(name,weight,foods);
       if(!saveResult.ok){dietFormError.textContent=saveResult.message;return}
       customDishId=saveResult.id;
     }
@@ -6463,20 +7386,41 @@ async function submitDietRecord(e){
   };
   rec.item_key=buildDietItemKey(rec);
 
-  const arr=loadData(STORAGE_KEYS.DIET_RECORDS,[]);
-  const existing=findMergeCandidate(arr,rec);
-  if(existing){
-    const index=arr.findIndex(x=>x.diet_id===existing.diet_id);
-    const merged=mergeDietRecord(existing,rec);
-    arr[index]=merged;
-  }else arr.push(rec);
+  const isOwnCloud=currentSupabaseUser&&mid===currentAccountMemberId();
+
+  if(isOwnCloud){
+    try{
+      await insertDietRecordCloud(rec);
+      await syncDietCloud();
+    }catch(err){
+      console.error("保存饮食到 Supabase 失败：",err);
+      dietFormError.textContent="保存失败："+authErrorText(err);
+      return;
+    }
+  }else{
+    const arr=loadData(STORAGE_KEYS.DIET_RECORDS,[]);
+    const existing=findMergeCandidate(arr,rec);
+    if(existing){
+      const index=arr.findIndex(x=>x.diet_id===existing.diet_id);
+      const merged=mergeDietRecord(existing,rec);
+      arr[index]=merged;
+    }else arr.push(rec);
+    saveData(STORAGE_KEYS.DIET_RECORDS,arr);
+  }
 
   if(customDishId){
     const recipes=loadCustomDishes(),ri=recipes.findIndex(x=>x.custom_dish_id===customDishId);
-    if(ri>=0){recipes[ri].use_count=Number(recipes[ri].use_count||0)+1;recipes[ri].last_used_at=now.toISOString();saveCustomDishes(recipes)}
+    if(ri>=0){
+      recipes[ri].use_count=Number(recipes[ri].use_count||0)+1;
+      recipes[ri].last_used_at=now.toISOString();
+      saveCustomDishes(recipes);
+      if(recipes[ri].cloud){
+        try{await updateRecipeUsageCloud(customDishId,now.toISOString())}
+        catch(err){console.warn("菜谱使用次数云端更新失败：",err)}
+      }
+    }
   }
 
-  saveData(STORAGE_KEYS.DIET_RECORDS,arr);
   closeDietModal();dietMemberSelect.value=mid;dietDateSelect.value=date;renderDietPage();renderHome();
 }
 function dailyNutrition(mid,date){
@@ -6571,7 +7515,7 @@ function updateDietEditPreview(){
   const calc=recalculateDietRecord(r,w,q).total;
   document.getElementById("dietEditPreview").innerHTML=`<div class="diet-edit-preview-main">${roundNumber(calc.calorie)} kcal</div><div class="diet-edit-preview-meta"><span>蛋白质 ${roundNumber(calc.protein)}g</span><span>脂肪 ${roundNumber(calc.fat)}g</span><span>碳水 ${roundNumber(calc.carb)}g</span><span>膳食纤维 ${roundNumber(calc.fiber)}g</span><span>钠 ${roundNumber(calc.sodium)}mg</span></div>`;
 }
-function saveDietRecordEdit(){
+async function saveDietRecordEdit(){
   if(!editingDietRecordId)return;
   const arr=loadData(STORAGE_KEYS.DIET_RECORDS,[]),idx=arr.findIndex(x=>x.diet_id===editingDietRecordId);if(idx<0)return;
   const q=Number(document.getElementById("dietEditQuantity").value||0),w=Number(document.getElementById("dietEditWeight").value||0);
@@ -6579,21 +7523,65 @@ function saveDietRecordEdit(){
   const calc=recalculateDietRecord(arr[idx],w,q);
   const validation=validateNutritionResult(calc.total,{type:arr[idx].dish_id?"dish":arr[idx].diet_type==="single"?"food":"custom",id:arr[idx].dish_id||arr[idx].food_list?.[0]?.food_id||""});
   if(!validation.ok){document.getElementById("dietEditError").textContent=validation.message;return}
-  arr[idx]=calc.record;saveData(STORAGE_KEYS.DIET_RECORDS,arr);
+
+  const next={...calc.record,diet_id:arr[idx].diet_id,cloud:arr[idx].cloud,cloud_diet_log_id:arr[idx].cloud_diet_log_id};
+  const isOwnCloud=currentSupabaseUser&&next.member_id===currentAccountMemberId()&&next.cloud;
+
+  if(isOwnCloud){
+    try{
+      await updateDietRecordCloud(next);
+      await syncDietCloud();
+    }catch(err){
+      document.getElementById("dietEditError").textContent="保存失败："+authErrorText(err);
+      return;
+    }
+  }else{
+    arr[idx]=next;
+    saveData(STORAGE_KEYS.DIET_RECORDS,arr);
+  }
+
   closeDietEditModal();renderDietPage();renderHome();
 }
 
-function saveCustomDishFromDietBuilder(name,weight,foodList){
+async function saveCustomDishFromDietBuilder(name,weight,foodList){
   const dishes=loadCustomDishes();
   const duplicate=dishes.find(d=>normalizeText(d.name)===normalizeText(name));
   if(duplicate)return {ok:false,message:"“我的菜谱”中已存在同名菜品，请前往“我的菜谱”修改，或更换名称。"};
-  const id=generateId("cd"),now=new Date().toISOString();
-  dishes.push({
-    custom_dish_id:id,name,aliases:[],default_serving_g:roundNumber(weight,1),
-    ingredients:(foodList||[]).map(f=>({food_id:f.food_id||"",food_name:f.food_name||"",weight_g:roundNumber(f.std_weight||0,1)})),
-    use_count:0,last_used_at:"",created_at:now,updated_at:now
-  });
-  saveCustomDishes(dishes);return {ok:true,id};
+
+  const now=new Date().toISOString();
+  const record={
+    custom_dish_id:"",
+    name,
+    aliases:[],
+    default_serving_g:roundNumber(weight,1),
+    ingredients:(foodList||[]).map(f=>({
+      food_id:f.food_id||"",
+      food_name:f.food_name||"",
+      weight_g:roundNumber(f.std_weight||0,1),
+      source_type:f.source_type||"",
+      nutrition_snapshot_per_100g:f.nutrition_snapshot_per_100g||null
+    })),
+    use_count:0,
+    last_used_at:"",
+    created_at:now,
+    updated_at:now,
+    cloud:Boolean(currentSupabaseUser)
+  };
+
+  if(currentSupabaseUser){
+    try{
+      const id=await saveRecipeCloud(record);
+      return {ok:true,id};
+    }catch(err){
+      return {ok:false,message:"菜谱保存到 Supabase 失败："+authErrorText(err)};
+    }
+  }
+
+  record.custom_dish_id=generateId("cd");
+  record.cloud=false;
+  dishes.push(record);
+  saveCustomDishes(dishes);
+  return {ok:true,id:record.custom_dish_id};
 }
 
 function openCustomDishLibrary(){
@@ -6658,27 +7646,81 @@ function renderRecipeIngredientList(){
   if(!recipeEditorIngredients.length){box.innerHTML=`<div class="card-subtitle" style="padding:10px 0">尚未添加食材</div>`;return}
   box.innerHTML=recipeEditorIngredients.map(i=>`<div class="recipe-editor-row"><div class="${i.food_id?"":"recipe-unrecognized"}">${escapeHtml(i.food_name)}${i.food_id?"":" · 未识别，营养无法估算"}</div><div>${i.weight_g}g</div><button class="small-danger-btn" onclick="removeRecipeIngredient('${i.recipe_id}')">删除</button></div>`).join("");
 }
-function saveCustomDishTemplate(){
-  const id=document.getElementById("customDishEditorId").value,name=document.getElementById("customDishEditorName").value.trim(),weight=Number(document.getElementById("customDishEditorWeight").value||0),error=document.getElementById("customDishEditorError");
+async function saveCustomDishTemplate(){
+  const id=document.getElementById("customDishEditorId").value;
+  const name=document.getElementById("customDishEditorName").value.trim();
+  const weight=Number(document.getElementById("customDishEditorWeight").value||0);
+  const error=document.getElementById("customDishEditorError");
+  error.textContent="";
+
   if(!name||weight<=0){error.textContent="请填写菜谱名称和有效参考总重量。";return}
   if(!recipeEditorIngredients.length){error.textContent="请至少添加一种食材。";return}
-  const dishes=loadCustomDishes(),duplicate=dishes.find(d=>d.custom_dish_id!==id&&normalizeText(d.name)===normalizeText(name));
+
+  const dishes=loadCustomDishes();
+  const duplicate=dishes.find(d=>d.custom_dish_id!==id&&normalizeText(d.name)===normalizeText(name));
   if(duplicate){error.textContent="已存在同名个人菜谱，请更换名称。";return}
-  const now=new Date().toISOString(),record={
-    custom_dish_id:id||generateId("cd"),name,
+
+  const existing=id?findCustomDishById(id):null;
+  const now=new Date().toISOString();
+  const record={
+    custom_dish_id:id||"",
+    name,
     aliases:document.getElementById("customDishEditorAliases").value.split(/[，,、;；]/).map(x=>x.trim()).filter(Boolean),
     default_serving_g:roundNumber(weight,1),
-    ingredients:recipeEditorIngredients.map(i=>({food_id:i.food_id||"",food_name:i.food_name,weight_g:roundNumber(i.weight_g,1),source_type:i.source_type||"",nutrition_snapshot_per_100g:i.nutrition_snapshot_per_100g||null})),
-    use_count:0,last_used_at:"",created_at:now,updated_at:now
+    ingredients:recipeEditorIngredients.map(i=>({
+      food_id:i.food_id||"",
+      food_name:i.food_name,
+      weight_g:roundNumber(i.weight_g,1),
+      source_type:i.source_type||"",
+      nutrition_snapshot_per_100g:i.nutrition_snapshot_per_100g||null
+    })),
+    use_count:Number(existing?.use_count||0),
+    last_used_at:existing?.last_used_at||"",
+    created_at:existing?.created_at||now,
+    updated_at:now,
+    cloud:Boolean(currentSupabaseUser)
   };
-  if(id){const idx=dishes.findIndex(d=>d.custom_dish_id===id);if(idx>=0)dishes[idx]={...dishes[idx],...record,use_count:dishes[idx].use_count||0,last_used_at:dishes[idx].last_used_at||"",created_at:dishes[idx].created_at||now}}
-  else dishes.push(record);
-  saveCustomDishes(dishes);closeCustomDishEditor();renderCustomDishLibrary();
+
+  if(currentSupabaseUser){
+    if(existing?.cloud)record.cloud=true;
+    try{
+      await saveRecipeCloud(record);
+      closeCustomDishEditor();
+      renderCustomDishLibrary();
+      return;
+    }catch(err){
+      error.textContent="保存失败："+authErrorText(err);
+      return;
+    }
+  }
+
+  record.custom_dish_id=id||generateId("cd");
+  record.cloud=false;
+  if(id){
+    const idx=dishes.findIndex(d=>d.custom_dish_id===id);
+    if(idx>=0)dishes[idx]=record;
+  }else dishes.push(record);
+  saveCustomDishes(dishes);
+  closeCustomDishEditor();
+  renderCustomDishLibrary();
 }
-function deleteCustomDishTemplate(id){
+async function deleteCustomDishTemplate(id){
   const dish=findCustomDishById(id);if(!dish)return;
   if(!confirm(`确定删除“${dish.name}”吗？\n\n删除菜谱不会影响已经保存的历史饮食记录。`))return;
-  saveCustomDishes(loadCustomDishes().filter(d=>d.custom_dish_id!==id));renderCustomDishLibrary();
+
+  if(currentSupabaseUser&&dish.cloud){
+    try{
+      await deleteRecipeCloud(id);
+      renderCustomDishLibrary();
+      return;
+    }catch(err){
+      alert("删除菜谱失败："+authErrorText(err));
+      return;
+    }
+  }
+
+  saveCustomDishes(loadCustomDishes().filter(d=>d.custom_dish_id!==id));
+  renderCustomDishLibrary();
 }
 
 function renderDailyMeals(){
@@ -6703,12 +7745,25 @@ function showDietRecordDetail(id){
   const q=getDietRecordQuantity(r);
   alert(`${dietDisplayName(r)}\n总食用份数：${q}\n总重量：约 ${r.estimated_total_weight||0}g\n\n${lines}\n\n热量：${r.total_calorie||0} kcal\n蛋白质：${r.total_protein||0} g\n脂肪：${r.total_fat||0} g\n碳水：${r.total_carb||0} g\n膳食纤维：${r.total_fiber||0} g${r.partial_nutrition?"\n\n提示：存在未识别或缺失食材，营养为部分估算。":""}`);
 }
-function deleteDietRecord(id){
+async function deleteDietRecord(id){
   const a=loadData(STORAGE_KEYS.DIET_RECORDS,[]),r=a.find(x=>x.diet_id===id);if(!r)return;
   const q=getDietRecordQuantity(r);
   const label=q>1?`${dietName(r)} ×${q} 的全部记录`:dietName(r);
   if(!confirm(`确定删除“${label}”吗？`))return;
-  saveData(STORAGE_KEYS.DIET_RECORDS,a.filter(x=>x.diet_id!==id));
+
+  const isOwnCloud=currentSupabaseUser&&r.member_id===currentAccountMemberId()&&r.cloud;
+  if(isOwnCloud){
+    try{
+      await deleteDietRecordCloud(r);
+      await syncDietCloud();
+    }catch(err){
+      alert("删除饮食记录失败："+authErrorText(err));
+      return;
+    }
+  }else{
+    saveData(STORAGE_KEYS.DIET_RECORDS,a.filter(x=>x.diet_id!==id));
+  }
+
   renderDietPage();renderHome();
 }
 function initDietHistoryDates(){const e=new Date(),s=new Date();s.setDate(s.getDate()-6);dietHistoryStart.value=formatDate(s);dietHistoryEnd.value=formatDate(e)}
