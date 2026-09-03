@@ -1139,59 +1139,6 @@
 .personal-profile-summary-main small{display:block;margin-top:4px;color:var(--text-light);font-size:10px}
 .personal-profile-readonly{min-height:44px;display:flex;align-items:center;padding:0 13px;border:1px solid var(--border);border-radius:10px;background:#f8faf9;color:var(--text-secondary);font-size:12px}
 
-
-/* v3：个人首页最近健康动态改为紧凑文字行 */
-#page-home .personal-home-recent-scroll{
-  display:block !important;
-  overflow:visible !important;
-  padding:0 !important;
-}
-#page-home .personal-home-recent-item{
-  display:flex !important;
-  align-items:center !important;
-  gap:10px !important;
-  min-width:0 !important;
-  width:100% !important;
-  padding:10px 0 !important;
-  border:0 !important;
-  border-bottom:1px solid var(--border) !important;
-  border-radius:0 !important;
-  background:transparent !important;
-}
-#page-home .personal-home-recent-item:last-child{
-  border-bottom:0 !important;
-}
-#page-home .personal-home-recent-item .personal-home-row-icon{
-  display:none !important;
-}
-#page-home .personal-home-recent-item strong{
-  display:inline !important;
-  font-size:12px !important;
-  font-weight:800 !important;
-  flex:0 0 auto;
-}
-#page-home .personal-home-recent-item small{
-  display:inline !important;
-  margin:0 !important;
-  font-size:10px !important;
-  color:var(--text-light) !important;
-  white-space:nowrap !important;
-  overflow:hidden !important;
-  text-overflow:ellipsis !important;
-}
-#page-home .personal-home-recent-value{
-  font-size:12px;
-  font-weight:800;
-  color:var(--text-primary);
-  white-space:nowrap;
-}
-#page-home .personal-home-recent-meta{
-  margin-left:auto;
-  font-size:10px;
-  color:var(--text-light);
-  white-space:nowrap;
-}
-
 </style>
 
   <meta name="yuni-build" content="production-v2-syncfix">
@@ -2674,7 +2621,7 @@
 </div>
 
 <script>
-const APP_VERSION="2026.09.03-production-v3-recent-text-rows";
+const APP_VERSION="2026.09.03-production-v2-syncfix";
 
 /* =========================
    Supabase 第一阶段
@@ -4213,34 +4160,206 @@ function personalHomeLatestRows(memberId){
   const diet=loadData(STORAGE_KEYS.DIET_RECORDS,[]).filter(r=>!memberId||r.member_id===memberId);
 
   health.forEach(r=>{
-    const info=formatPersonalRecentHealthRow(r);
     rows.push({
-      kind:"health",
       date:r.record_date||"",
-      time:r.record_time||"",
-      label:info.label,
-      value:info.value,
-      meta:personalRecentDateTime(r)
+      icon:"❤️",
+      title:getRecordTypeText(r.record_type),
+      text:r.record_date||""
     });
   });
-
   diet.forEach(r=>{
     rows.push({
-      kind:"diet",
       date:r.diet_date||"",
-      time:r.record_time||"",
-      label:r.meal_type||r.diet_period||"饮食记录",
-      value:r.total_calorie!=null?`${roundNumber(r.total_calorie,0)} kcal`:"",
-      meta:personalRecentDateTime(r)
+      icon:"🥗",
+      title:r.meal_type||"饮食记录",
+      text:`${r.diet_date||""}${r.total_calorie?` · ${roundNumber(r.total_calorie,0)} kcal`:""}`
     });
   });
-
-  return rows.sort((a,b)=>{
-    const ak=`${a.date||""} ${a.time||""}`;
-    const bk=`${b.date||""} ${b.time||""}`;
-    return bk.localeCompare(ak);
-  }).slice(0,6);
+  return rows.sort((a,b)=>String(b.date).localeCompare(String(a.date))).slice(0,6);
 }
+
+function personalHomeRecordStreak(memberId){
+  if(!memberId)return 0;
+  const dates=new Set();
+  loadData(STORAGE_KEYS.HEALTH_RECORDS,[]).filter(r=>r.member_id===memberId&&r.record_date).forEach(r=>dates.add(r.record_date));
+  loadData(STORAGE_KEYS.DIET_RECORDS,[]).filter(r=>r.member_id===memberId&&r.diet_date).forEach(r=>dates.add(r.diet_date));
+  try{loadReminderLogs().map(normalizeReminderLog).filter(r=>r.member_id===memberId).forEach(r=>{const d=getReminderLogCompletedDate(r);if(d)dates.add(d)})}catch{}
+  if(!dates.size)return 0;
+  const latest=[...dates].sort().reverse()[0]; let cur=new Date(latest+'T12:00:00'),n=0;
+  while(true){const k=cur.getFullYear()+'-'+String(cur.getMonth()+1).padStart(2,'0')+'-'+String(cur.getDate()).padStart(2,'0');if(!dates.has(k))break;n++;cur.setDate(cur.getDate()-1)}
+  return n;
+}
+
+
+function togglePersonalRecentMore(event){
+  event?.stopPropagation();
+  const menu=document.getElementById("personalRecentMoreMenu");
+  if(menu)menu.style.display=menu.style.display==="none"?"block":"none";
+}
+function goPersonalRecentMore(page){
+  const menu=document.getElementById("personalRecentMoreMenu");
+  if(menu)menu.style.display="none";
+  if(page==="reminder"){
+    goHomeSection("reminder","pending");
+    requestAnimationFrame(()=>{
+      const memberId=getPersonalHomeMemberId();
+      const filter=document.getElementById("reminderListMemberFilter");
+      if(filter&&memberId&&[...filter.options].some(o=>o.value===memberId)){
+        filter.value=memberId;
+        filter.dispatchEvent(new Event("change",{bubbles:true}));
+      }
+    });
+    return;
+  }
+  goHomeSection(page);
+}
+document.addEventListener("click",e=>{
+  if(!e.target.closest?.("#homePersonalOverviewPane .home-more-menu-wrap")){
+    const menu=document.getElementById("personalRecentMoreMenu");
+    if(menu)menu.style.display="none";
+  }
+});
+
+
+function latestPersonalMetricValue(memberId,type,field){
+  const rows=loadData(STORAGE_KEYS.HEALTH_RECORDS,[])
+    .filter(r=>r.member_id===memberId&&r.record_type===type&&r[field]!=null)
+    .sort((a,b)=>`${a.record_date||""} ${a.record_time||""}`.localeCompare(`${b.record_date||""} ${b.record_time||""}`));
+  return rows.length?Number(rows[rows.length-1][field]):null;
+}
+
+function personalProfileGenderDbValue(){
+  const raw=String(document.getElementById("personalProfileGender")?.value||"");
+  return raw?Number(raw):null;
+}
+
+async function openPersonalHealthProfileEditor(){
+  if(currentSupabaseUser){
+    await refreshCurrentUserCloudState({reason:"open-personal-profile"});
+  }
+
+  if(!currentSupabaseUser){alert("请先登录。");return}
+
+  ensureCurrentAccountMember();
+  const memberId=currentAccountMemberId();
+  const p=currentSupabaseProfile||{};
+  const identity=AuthService.current()||{};
+  const latestHeight=latestPersonalMetricValue(memberId,"height","height_value");
+  const latestWeight=latestPersonalMetricValue(memberId,"weight","weight_value");
+
+  const nickname=document.getElementById("personalProfileNickname");
+  const birth=document.getElementById("personalProfileBirthDate");
+  const gender=document.getElementById("personalProfileGender");
+  const height=document.getElementById("personalProfileHeight");
+  const weight=document.getElementById("personalProfileWeight");
+  const updated=document.getElementById("personalProfileUpdatedAt");
+  const error=document.getElementById("personalHealthProfileError");
+
+  if(nickname)nickname.value=p.nickname||identity.nickname||"";
+  if(birth)birth.value=p.birth_date||identity.birth_date||"";
+  if(gender){
+    const gv=p.gender==null?"":String(p.gender);
+    gender.value=["1","2","3"].includes(gv)?gv:"";
+  }
+  if(height)height.value=latestHeight??p.height_cm??"";
+  if(weight)weight.value=latestWeight??"";
+  if(updated)updated.textContent=p.updated_at?new Date(p.updated_at).toLocaleString():"尚未更新";
+  if(error)error.textContent="";
+
+  const summary=document.getElementById("personalHealthProfileSummary");
+  if(summary){
+    const name=p.nickname||identity.nickname||"本人";
+    const healthId=p.health_id||identity.yuni_id||"-";
+    summary.innerHTML=`<div class="personal-profile-summary-avatar">${escapeHtml(name.slice(0,1)||"我")}</div>
+      <div class="personal-profile-summary-main"><strong>${escapeHtml(name)}</strong><small>用户 ID：${escapeHtml(healthId)} · 本人健康档案</small></div>`;
+  }
+
+  document.getElementById("personalHealthProfileModal")?.classList.add("show");
+}
+
+function closePersonalHealthProfileEditor(){
+  document.getElementById("personalHealthProfileModal")?.classList.remove("show");
+}
+
+async function savePersonalHealthProfile(event){
+  event.preventDefault();
+  if(!currentSupabaseUser)return;
+
+  const errorBox=document.getElementById("personalHealthProfileError");
+  const btn=document.getElementById("personalHealthProfileSaveBtn");
+  if(errorBox)errorBox.textContent="";
+
+  const nickname=document.getElementById("personalProfileNickname")?.value.trim()||"";
+  const birth_date=document.getElementById("personalProfileBirthDate")?.value||null;
+  const gender=personalProfileGenderDbValue();
+  const heightRaw=document.getElementById("personalProfileHeight")?.value;
+  const weightRaw=document.getElementById("personalProfileWeight")?.value;
+  const height_cm=heightRaw!==""?Number(heightRaw):null;
+  const weight_kg=weightRaw!==""?Number(weightRaw):null;
+
+  if(!nickname){if(errorBox)errorBox.textContent="昵称不能为空。";return}
+  if(height_cm!=null&&(!Number.isFinite(height_cm)||height_cm<50||height_cm>250)){if(errorBox)errorBox.textContent="请输入合理的身高。";return}
+  if(weight_kg!=null&&(!Number.isFinite(weight_kg)||weight_kg<10||weight_kg>500)){if(errorBox)errorBox.textContent="请输入合理的体重。";return}
+  if(birth_date&&birth_date>formatDate()){if(errorBox)errorBox.textContent="出生日期不能晚于今天。";return}
+
+  if(btn){btn.disabled=true;btn.textContent="正在保存…";}
+
+  try{
+    const nowIso=new Date().toISOString();
+
+    const {data:profile,error:profileError}=await yuniSupabase
+      .from("user_profile")
+      .update({nickname,birth_date,gender,height_cm,updated_at:nowIso})
+      .eq("user_id",currentSupabaseUser.id)
+      .select("user_id,health_id,nickname,avatar_path,bio,region,gender,birth_date,height_cm,show_region,show_age_band,show_gender,created_at,updated_at")
+      .single();
+    if(profileError)throw profileError;
+    currentSupabaseProfile=profile;
+
+    const authUpdate=await yuniSupabase.auth.updateUser({data:{nickname,birth_date,gender,height_cm}});
+    if(authUpdate.error)console.warn("Auth metadata 健康资料同步失败：",authUpdate.error);
+
+    const memberId=currentAccountMemberId();
+    const today=formatDate();
+    const now=new Date();
+    const time=`${String(now.getHours()).padStart(2,"0")}:${String(now.getMinutes()).padStart(2,"0")}`;
+
+    const previousHeight=latestPersonalMetricValue(memberId,"height","height_value");
+    if(height_cm!=null && (previousHeight==null || Math.abs(previousHeight-height_cm)>=0.01)){
+      const payload=localHealthRecordToDb({member_id:memberId,record_type:"height",height_value:height_cm,record_date:today,record_time:time,remark:"本人健康资料更新"});
+      const {error}=await yuniSupabase.from("health_measurements").insert(payload);
+      if(error)throw new Error("身高记录保存失败："+authErrorText(error));
+    }
+
+    const previousWeight=latestPersonalMetricValue(memberId,"weight","weight_value");
+    if(weight_kg!=null && (previousWeight==null || Math.abs(previousWeight-weight_kg)>=0.01)){
+      const payload=localHealthRecordToDb({member_id:memberId,record_type:"weight",weight_value:weight_kg,record_date:today,record_time:time,remark:"本人健康资料更新"});
+      const {error}=await yuniSupabase.from("health_measurements").insert(payload);
+      if(error)throw new Error("体重记录保存失败："+authErrorText(error));
+    }
+
+    await syncHealthMeasurementsFromSupabase();
+
+    const identity=profileToLocalIdentity(currentSupabaseUser,currentSupabaseProfile);
+    AuthService.save(identity);
+    ensureCurrentAccountMember();
+
+    renderIdentityTopbar();
+    renderPersonalHomeOverview();
+    renderHealthPage();
+    renderAnalysisPage();
+    renderMembers();
+
+    closePersonalHealthProfileEditor();
+    alert("个人健康资料已保存。");
+  }catch(err){
+    console.error("保存个人健康资料失败：",err);
+    if(errorBox)errorBox.textContent="保存失败："+authErrorText(err);
+  }finally{
+    if(btn){btn.disabled=false;btn.textContent="保存健康资料";}
+  }
+}
+
 function renderPersonalHomeOverview(){
   const memberId=getPersonalHomeMemberId();
   const identity=AuthService.current()||{};
@@ -4300,9 +4419,9 @@ function renderPersonalHomeOverview(){
   if(recentBox){
     recentBox.innerHTML=recent.length
       ? recent.slice(0,3).map(x=>`<div class="personal-home-recent-item">
-          <strong>${escapeHtml(x.label)}</strong>
-          <span class="personal-home-recent-value">${escapeHtml(x.value||"")}</span>
-          <span class="personal-home-recent-meta">${escapeHtml(x.meta||"")}</span>
+          <div class="personal-home-row-icon">${x.icon}</div>
+          <strong>${escapeHtml(x.title)}</strong>
+          <small>${escapeHtml(x.text)}</small>
         </div>`).join("")
       : `<div class="personal-home-empty">还没有本人近期健康动态</div>`;
   }
